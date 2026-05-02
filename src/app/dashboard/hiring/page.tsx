@@ -3,9 +3,10 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BrainCircuit, CheckCircle2, XCircle, FileText, UserCircle, MapPin, Users } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { BrainCircuit, CheckCircle2, XCircle, FileText, UserCircle, MapPin, Users, MessageSquare } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { guardianApi, Application } from "@/lib/api/guardian";
+import { messageApi } from "@/lib/api/messages";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ interface Job {
 
 function HiringContent() {
   const { data: session } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialJobId = searchParams?.get("job");
 
@@ -30,6 +32,7 @@ function HiringContent() {
   const [error, setError] = useState<string | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isMessaging, setIsMessaging] = useState(false);
 
   useEffect(() => {
     async function fetchJobs() {
@@ -80,6 +83,19 @@ function HiringContent() {
       alert("Failed to update status. Please try again.");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleMessageTutor = async (tutorId: string) => {
+    if (!session?.accessToken) return;
+    setIsMessaging(true);
+    try {
+      await messageApi.initiateConversation(session.accessToken, tutorId);
+      router.push("/dashboard/messages");
+    } catch (err) {
+      alert("Failed to initiate chat.");
+    } finally {
+      setIsMessaging(false);
     }
   };
 
@@ -255,33 +271,45 @@ function HiringContent() {
                 </p>
               </div>
 
-              {selectedApp.status === "PENDING" ? (
-                <div className="flex gap-3 pt-4 border-t border-border">
-                  <Button
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={() => handleUpdateStatus(selectedApp.id, "ACCEPTED")}
-                    disabled={isUpdating}
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Accept & Hire
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={() => handleUpdateStatus(selectedApp.id, "REJECTED")}
-                    disabled={isUpdating}
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Reject
-                  </Button>
-                </div>
-              ) : (
-                <div className="pt-4 border-t border-border text-center">
-                  <Badge className={selectedApp.status === "ACCEPTED" ? "bg-emerald-500 text-white text-sm py-1.5 px-4" : "bg-red-500 text-white text-sm py-1.5 px-4"}>
-                    You have {selectedApp.status.toLowerCase()} this application
-                  </Badge>
-                </div>
-              )}
+              <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                {selectedApp.status === "PENDING" && (
+                  <div className="flex gap-3">
+                    <Button
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                      onClick={() => handleUpdateStatus(selectedApp.id, "ACCEPTED")}
+                      disabled={isUpdating}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Accept & Hire
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => handleUpdateStatus(selectedApp.id, "REJECTED")}
+                      disabled={isUpdating}
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject
+                    </Button>
+                  </div>
+                )}
+                {selectedApp.status !== "PENDING" && (
+                  <div className="text-center pb-2">
+                    <Badge className={selectedApp.status === "ACCEPTED" ? "bg-emerald-500 text-white text-sm py-1.5 px-4" : "bg-red-500 text-white text-sm py-1.5 px-4"}>
+                      You have {selectedApp.status.toLowerCase()} this application
+                    </Badge>
+                  </div>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={() => handleMessageTutor(selectedApp.tutorId)}
+                  disabled={isMessaging}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Message Tutor
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
