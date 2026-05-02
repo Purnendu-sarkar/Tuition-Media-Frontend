@@ -44,8 +44,9 @@ export const adminApi = {
     });
   },
 
-  getUsers: (token: string) => {
-    return apiClient.get<{ users: AdminUser[] }>("/api/v1/admin/users", {
+  getUsers: (token: string, role?: string) => {
+    const url = role ? `/api/v1/admin/users?role=${role}` : "/api/v1/admin/users";
+    return apiClient.get<{ users: AdminUser[] }>(url, {
       Authorization: `Bearer ${token}`
     });
   },
