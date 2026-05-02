@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, Send, AlertCircle, CheckCircle2, BrainCircuit, Sparkles, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { jobApi, Job } from "@/lib/api/job";
+import { aiApi } from "@/lib/api/ai";
 
 interface ApplyJobModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function ApplyJobModal({ isOpen, onClose, job, onSuccess }: ApplyJobModal
   const { data: session } = useSession();
   const [coverLetter, setCoverLetter] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen || !job) return null;
@@ -41,6 +43,23 @@ export function ApplyJobModal({ isOpen, onClose, job, onSuccess }: ApplyJobModal
       setError(err.message || "Failed to apply for this job. You might have already applied.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleGenerateAI = async () => {
+    if (!session?.accessToken || !job) return;
+
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const response = await aiApi.generateCoverLetter(session.accessToken, job.id);
+      setCoverLetter(response.coverLetter);
+    } catch (err: any) {
+      setError("Failed to generate message with AI. Please try writing manually.");
+      console.error("AI Generation error:", err);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -82,17 +101,44 @@ export function ApplyJobModal({ isOpen, onClose, job, onSuccess }: ApplyJobModal
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="coverLetter" className="text-sm font-medium">
-                  Cover Letter <span className="text-muted-foreground font-normal">(Optional but recommended)</span>
-                </label>
-                <textarea 
-                  id="coverLetter" 
-                  className="flex min-h-[120px] w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  placeholder="Explain why you are the best fit for this tuition..." 
-                  value={coverLetter}
-                  onChange={e => setCoverLetter(e.target.value)}
-                />
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="coverLetter" className="text-sm font-medium">
+                    Application Message <span className="text-muted-foreground font-normal">(AI can help!)</span>
+                  </label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleGenerateAI}
+                    disabled={isGenerating || isSubmitting}
+                    className="h-8 gap-1.5 text-xs font-semibold border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary transition-all active:scale-95"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" />
+                    )}
+                    Generate with AI
+                  </Button>
+                </div>
+                <div className="relative">
+                  <textarea 
+                    id="coverLetter" 
+                    className="flex min-h-[160px] w-full rounded-xl border border-input bg-background/50 px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all resize-none"
+                    placeholder="Write why you're a great fit, or let AI help you..." 
+                    value={coverLetter}
+                    onChange={e => setCoverLetter(e.target.value)}
+                  />
+                  {isGenerating && (
+                    <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px] flex items-center justify-center rounded-xl">
+                      <div className="flex flex-col items-center gap-2">
+                        <BrainCircuit className="h-8 w-8 text-primary animate-pulse" />
+                        <span className="text-xs font-medium text-primary">AI is writing...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pt-4 flex gap-3 justify-end border-t border-border mt-6">

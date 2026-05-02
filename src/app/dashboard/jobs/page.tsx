@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Filter, Briefcase, SlidersHorizontal, AlertCircle } from "lucide-react";
 
@@ -11,6 +12,7 @@ import { ApplyJobModal } from "@/components/dashboard/apply-job-modal";
 import { jobApi, Job } from "@/lib/api/job";
 
 export default function BrowseJobsPage() {
+  const { data: session } = useSession();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,20 @@ export default function BrowseJobsPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+    if (session?.accessToken) {
+      fetchAppliedJobs();
+    }
+  }, [session?.accessToken]);
+
+  const fetchAppliedJobs = async () => {
+    if (!session?.accessToken) return;
+    try {
+      const jobIds = await jobApi.getAppliedJobs(session.accessToken);
+      setAppliedJobIds(new Set(jobIds));
+    } catch (err) {
+      console.error("Failed to fetch applied jobs:", err);
+    }
+  };
 
   const fetchJobs = async () => {
     setIsLoading(true);

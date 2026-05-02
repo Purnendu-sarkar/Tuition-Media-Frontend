@@ -35,4 +35,10 @@ export const jobApi = {
       }
     );
   },
+  
+  getAppliedJobs: (token: string) => {
+    return apiClient.get<string[]>("/api/v1/jobs/applied", {
+      Authorization: `Bearer ${token}`,
+    });
+  },
 };

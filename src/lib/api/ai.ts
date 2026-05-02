@@ -10,4 +10,14 @@ export const aiApi = {
       }
     );
   },
+  
+  generateCoverLetter: (token: string, jobId: string) => {
+    return apiClient.post<{ coverLetter: string }>(
+      "/api/v1/ai/generate-cover-letter",
+      { jobId },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+  },
 };
