@@ -36,6 +36,13 @@ export const apiClient = {
       headers,
     });
   },
+  put<TResponse>(path: string, body: unknown, headers?: HeadersInit) {
+    return request<TResponse>(path, {
+      method: "PUT",
+      body: JSON.stringify(body),
+      headers,
+    });
+  },
   patch<TResponse>(path: string, body: unknown, headers?: HeadersInit) {
     return request<TResponse>(path, {
       method: "PATCH",

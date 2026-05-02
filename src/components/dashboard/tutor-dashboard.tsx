@@ -73,15 +73,87 @@ export function TutorDashboard({ data }: TutorDashboardProps) {
       className="space-y-8"
     >
       {!data.profileStatus.isProfileComplete && (
-        <motion.div variants={item} className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-amber-500 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold">Complete your profile</h3>
-            <p className="text-sm opacity-90 mt-1">Your profile is incomplete. Guardians are more likely to hire tutors with complete profiles. Please add your subjects, bio, and location.</p>
-            <Button variant="outline" size="sm" className="mt-3 border-amber-500/50 hover:bg-amber-500/20 text-amber-500">
-              Complete Profile
-            </Button>
-          </div>
+        <motion.div variants={item}>
+          <Card className="overflow-hidden border-border bg-surface shadow-xl relative group">
+            {/* Background Decorative Pattern */}
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700">
+              <Star className="h-40 w-40 text-primary rotate-12" />
+            </div>
+
+            <div className="p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center relative z-10">
+              {/* Progress Ring Section */}
+              <div className="relative flex items-center justify-center shrink-0">
+                <svg className="h-32 w-32 -rotate-90">
+                  <circle
+                    className="text-muted/20"
+                    strokeWidth="8"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                  />
+                  <motion.circle
+                    className="text-primary"
+                    strokeWidth="8"
+                    strokeDasharray={364.4}
+                    initial={{ strokeDashoffset: 364.4 }}
+                    animate={{ strokeDashoffset: 364.4 - (364.4 * data.profileStatus.completenessScore) / 100 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-black text-foreground">{data.profileStatus.completenessScore}%</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Complete</span>
+                </div>
+              </div>
+
+              {/* Text & Steps Section */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h3 className="text-2xl font-black font-[var(--font-space-grotesk)] text-foreground tracking-tight">Complete your profile</h3>
+                  <p className="text-muted-foreground mt-1 text-sm max-w-xl">
+                    Guardians are <span className="text-foreground font-bold underline decoration-primary/50 underline-offset-4">5x more likely</span> to hire tutors with 100% complete profiles. Boost your visibility today!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {data.profileStatus.missingSteps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-muted/30 p-2 rounded-lg border border-border/50">
+                      <div className="h-4 w-4 rounded-full border-2 border-primary/30 flex items-center justify-center shrink-0">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary/20" />
+                      </div>
+                      {step}
+                    </div>
+                  ))}
+                  {data.profileStatus.completenessScore >= 80 && (
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-500 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                      <CheckCircle2 className="h-4 w-4" /> You're almost there!
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Section */}
+              <div className="shrink-0 flex flex-col gap-3 w-full md:w-auto">
+                <Link href="/dashboard/profile" className="w-full">
+                  <Button size="lg" className="w-full h-14 px-8 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all group">
+                    Optimize Now
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Button variant="ghost" className="text-xs font-bold text-muted-foreground hover:text-foreground">
+                  Dismiss for now
+                </Button>
+              </div>
+            </div>
+          </Card>
         </motion.div>
       )}
 

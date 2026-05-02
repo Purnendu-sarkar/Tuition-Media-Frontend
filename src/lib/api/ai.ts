@@ -20,4 +20,14 @@ export const aiApi = {
       }
     );
   },
+
+  optimizeBio: (token: string, bio: string) => {
+    return apiClient.post<{ optimizedBio: string }>(
+      "/api/v1/ai/optimize-bio",
+      { bio },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+  },
 };
