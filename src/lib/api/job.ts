@@ -15,6 +15,7 @@ export interface Job {
   _count: {
     applications: number;
   };
+  matchScore?: number;
 }
 
 export const jobApi = {
@@ -38,6 +39,12 @@ export const jobApi = {
   
   getAppliedJobs: (token: string) => {
     return apiClient.get<string[]>("/api/v1/jobs/applied", {
+      Authorization: `Bearer ${token}`,
+    });
+  },
+
+  getMyApplications: (token: string) => {
+    return apiClient.get<any[]>("/api/v1/jobs/my-applications", {
       Authorization: `Bearer ${token}`,
     });
   },

@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Sparkles, 
-  Wand2, 
-  Briefcase, 
-  MapPin, 
-  DollarSign, 
-  AlignLeft, 
+import {
+  Sparkles,
+  Wand2,
+  Briefcase,
+  MapPin,
+  DollarSign,
+  AlignLeft,
   ArrowRight,
   CheckCircle2,
   AlertCircle
@@ -30,7 +30,7 @@ export default function AIJobPostGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState<CreateJobData>({
     title: "",
     description: "",
@@ -40,7 +40,7 @@ export default function AIJobPostGenerator() {
 
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim() || !session?.accessToken) return;
-    
+
     setIsGenerating(true);
     setError(null);
     try {
@@ -70,7 +70,7 @@ export default function AIJobPostGenerator() {
         ...formData,
         budget: formData.budget ? Number(formData.budget) : undefined
       });
-      
+
       // Success! Redirect back to dashboard overview or posts list
       router.push("/dashboard");
       router.refresh();
@@ -90,7 +90,7 @@ export default function AIJobPostGenerator() {
       </div>
 
       {error && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-red-500 flex items-start gap-3"
@@ -101,22 +101,22 @@ export default function AIJobPostGenerator() {
       )}
 
       {/* AI Generator Section */}
-      <Card className="relative overflow-hidden border-primary/20 bg-primary/5 p-6 sm:p-8">
-        <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-secondary-soft blur-3xl pointer-events-none" />
-        
+      <Card className="relative overflow-hidden border-indigo-500/30 bg-indigo-500/5 p-6 sm:p-8">
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
+
         <div className="relative z-10 flex flex-col gap-4">
-          <div className="mb-2 flex items-center gap-2 font-semibold text-primary">
+          <div className="flex items-center gap-2 text-indigo-500 font-semibold mb-2">
             <Sparkles className="h-5 w-5" />
             <h2>AI Magic Generator</h2>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Wand2 className="h-4 w-4 text-primary" />
+                <Wand2 className="h-4 w-4 text-indigo-400" />
               </div>
-              <Input 
+              <Input
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 onKeyDown={(e) => {
@@ -125,14 +125,14 @@ export default function AIJobPostGenerator() {
                     handleAiGenerate();
                   }
                 }}
-                placeholder="E.g., Need a math tutor for class 10 in Dhanmondi, 3 days a week" 
-                className="h-12 bg-background/80 pl-10 text-base border-primary/20 focus-visible:ring-primary/30 shadow-inner"
+                placeholder="E.g., Need a math tutor for class 10 in Dhanmondi, 3 days a week"
+                className="pl-10 h-12 text-base text-foreground placeholder:text-slate-500 dark:placeholder:text-slate-400 border-indigo-500/30 focus-visible:ring-indigo-500/50 bg-card shadow-inner"
               />
             </div>
-            <Button 
+            <Button
               onClick={handleAiGenerate}
               disabled={isGenerating || !aiPrompt.trim()}
-              className="h-12 shrink-0 px-8 shadow-[0_0_20px_rgba(15,118,110,0.24)] transition-all"
+              className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all shrink-0"
             >
               {isGenerating ? (
                 <>
@@ -146,7 +146,7 @@ export default function AIJobPostGenerator() {
               )}
             </Button>
           </div>
-          <p className="text-sm text-primary/80">
+          <p className="text-sm text-indigo-500/80">
             Just type what you need. AI will write a professional title and description for you.
           </p>
         </div>
@@ -159,9 +159,9 @@ export default function AIJobPostGenerator() {
             <label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-primary" /> Job Title <span className="text-red-500">*</span>
             </label>
-            <Input 
-              id="title" 
-              placeholder="e.g. Expert Math Tutor Required for SSC Candidate" 
+            <Input
+              id="title"
+              placeholder="e.g. Expert Math Tutor Required for SSC Candidate"
               value={formData.title}
               onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
               required
@@ -169,16 +169,16 @@ export default function AIJobPostGenerator() {
               className="h-11"
             />
           </div>
-          
+
           <div className="space-y-2">
             <label htmlFor="description" className="text-sm font-medium flex items-center gap-2">
               <AlignLeft className="h-4 w-4 text-primary" /> Description <span className="text-red-500">*</span>
             </label>
             <AnimatePresence mode="popLayout">
               {isGenerating ? (
-                <motion.div 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="h-40 rounded-md border border-border bg-muted/20 flex flex-col items-center justify-center gap-3"
                 >
@@ -190,12 +190,12 @@ export default function AIJobPostGenerator() {
                   <p className="text-sm text-muted-foreground animate-pulse">Writing the perfect description...</p>
                 </motion.div>
               ) : (
-                <motion.textarea 
-                  initial={{ opacity: 0 }} 
+                <motion.textarea
+                  initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  id="description" 
+                  id="description"
                   className="flex min-h-[160px] w-full rounded-md border border-input bg-transparent px-3 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Describe the student's needs, schedule, and any specific requirements for the tutor..." 
+                  placeholder="Describe the student's needs, schedule, and any specific requirements for the tutor..."
                   value={formData.description}
                   onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
                   required
@@ -210,24 +210,24 @@ export default function AIJobPostGenerator() {
               <label htmlFor="budget" className="text-sm font-medium flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-emerald-500" /> Monthly Budget (৳)
               </label>
-              <Input 
-                id="budget" 
+              <Input
+                id="budget"
                 type="number"
-                placeholder="e.g. 5000" 
+                placeholder="e.g. 5000"
                 value={formData.budget || ""}
                 onChange={e => setFormData(p => ({ ...p, budget: e.target.value ? Number(e.target.value) : undefined }))}
                 className="h-11"
               />
               <p className="text-xs text-muted-foreground">Leave blank if negotiable.</p>
             </div>
-            
+
             <div className="space-y-2">
               <label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-rose-500" /> Location <span className="text-red-500">*</span>
               </label>
-              <Input 
-                id="location" 
-                placeholder="e.g. Dhanmondi, Dhaka" 
+              <Input
+                id="location"
+                placeholder="e.g. Dhanmondi, Dhaka"
                 value={formData.location || ""}
                 onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
                 required

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Briefcase, SlidersHorizontal, AlertCircle } from "lucide-react";
+import { Search, Filter, Briefcase, SlidersHorizontal, AlertCircle, Sparkles } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,61 +70,79 @@ export default function BrowseJobsPage() {
     });
   };
 
-  // Memoized Filtering Logic
+  // Memoized Filtering & Sorting Logic
   const filteredJobs = useMemo(() => {
-    return jobs.filter(job => {
+    let result = jobs.filter(job => {
       // Basic Search
       const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             job.location?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Basic mock for "AI Matched" filter (In production, this comes from backend)
-      // We will pretend jobs with budgets > 5000 are "matches" just for UI demonstration
-      const isMatched = job.budget && job.budget > 5000;
+      // Filter for AI matches (Score > 70)
+      const isMatched = (job.matchScore || 0) >= 70;
       const matchesFilter = activeFilter === "ALL" || (activeFilter === "MATCHED" && isMatched);
 
       return matchesSearch && matchesFilter;
     });
+
+    // If AI Matches filter is on, sort by highest match score
+    if (activeFilter === "MATCHED") {
+      result = [...result].sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+    }
+
+    return result;
   }, [jobs, searchQuery, activeFilter]);
 
   return (
     <div className="space-y-8 pb-12">
       {/* Header Section */}
-      <div>
-        <h1 className="text-3xl font-bold font-[var(--font-space-grotesk)] text-foreground">Find Tuition Jobs</h1>
-        <p className="text-muted-foreground mt-2">Browse open positions and apply to jobs that match your skills.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black font-[var(--font-space-grotesk)] text-foreground tracking-tight">Find Tuition Jobs</h1>
+          <p className="text-muted-foreground mt-2 text-lg">Browse open positions and apply to jobs that match your skills.</p>
+        </div>
+        <div className="flex gap-4">
+          <div className="bg-surface px-6 py-3 rounded-2xl border border-border shadow-sm">
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Available Jobs</p>
+            <p className="text-2xl font-black text-primary">{jobs.length}</p>
+          </div>
+          <div className="bg-surface px-6 py-3 rounded-2xl border border-border shadow-sm ring-1 ring-primary/10">
+            <p className="text-[10px] text-primary font-bold uppercase tracking-widest">AI Matches</p>
+            <p className="text-2xl font-black text-primary">{jobs.filter(j => (j.matchScore || 0) >= 70).length}</p>
+          </div>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center bg-surface p-4 rounded-2xl border border-border shadow-sm">
+      <div className="flex flex-col lg:flex-row gap-4 items-center bg-surface/50 backdrop-blur-md p-2 rounded-[24px] border border-border shadow-xl ring-1 ring-white/5">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60" />
           <Input 
             placeholder="Search by subject, class, or location..." 
-            className="pl-10 h-12 bg-background/50 border-border/50 text-base"
+            className="pl-12 h-14 bg-background/40 border-none text-lg rounded-2xl focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-2 w-full lg:w-auto p-1 bg-background/40 rounded-2xl">
           <Button 
-            variant={activeFilter === "ALL" ? "default" : "outline"} 
-            className={`flex-1 sm:flex-none h-12 ${activeFilter === "ALL" ? "bg-primary text-primary-foreground" : ""}`}
+            variant={activeFilter === "ALL" ? "default" : "ghost"} 
+            className={`flex-1 lg:flex-none h-12 px-8 rounded-xl font-bold transition-all ${activeFilter === "ALL" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground"}`}
             onClick={() => setActiveFilter("ALL")}
           >
             All Jobs
           </Button>
           <Button 
-            variant={activeFilter === "MATCHED" ? "default" : "outline"}
-            className={`flex-1 sm:flex-none h-12 gap-2 ${activeFilter === "MATCHED" ? "bg-primary text-primary-foreground" : ""}`}
+            variant={activeFilter === "MATCHED" ? "default" : "ghost"}
+            className={`flex-1 lg:flex-none h-12 px-8 gap-2 rounded-xl font-bold transition-all ${activeFilter === "MATCHED" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "text-muted-foreground"}`}
             onClick={() => setActiveFilter("MATCHED")}
           >
-            <Filter className="h-4 w-4" /> AI Matches
-          </Button>
-          <Button variant="outline" size="icon" className="h-12 w-12 shrink-0 hidden sm:flex">
-            <SlidersHorizontal className="h-5 w-5" />
+            <Sparkles className="h-4 w-4" /> AI Matches
           </Button>
         </div>
+        <Button variant="outline" size="icon" className="h-14 w-14 shrink-0 hidden lg:flex rounded-2xl border-border/50 bg-background/40 hover:bg-background/60">
+          <SlidersHorizontal className="h-6 w-6" />
+        </Button>
       </div>
 
       {/* Content Section */}
@@ -174,8 +192,6 @@ export default function BrowseJobsPage() {
             }}
           >
             {filteredJobs.map((job) => {
-              // Simulated AI Match Score for UI completeness
-              const mockScore = job.budget && job.budget > 5000 ? Math.floor(Math.random() * 20) + 80 : 0;
               const hasApplied = appliedJobIds.has(job.id);
               
               return (
@@ -184,7 +200,7 @@ export default function BrowseJobsPage() {
                   job={job} 
                   hasApplied={hasApplied}
                   onApplyClick={handleApplyClick}
-                  matchScore={mockScore}
+                  matchScore={job.matchScore}
                 />
               );
             })}
