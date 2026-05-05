@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { PlusCircle, Search, MapPin, Users, Calendar, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { guardianApi } from "@/lib/api/guardian";
@@ -54,10 +54,18 @@ export default function GuardianPostsPage() {
     show: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-  };
+  const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
+  },
+};
 
   if (isLoading) {
     return (

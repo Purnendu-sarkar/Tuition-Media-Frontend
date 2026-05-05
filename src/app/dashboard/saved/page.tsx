@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { UserCircle, MapPin, Star, BookmarkMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -54,15 +54,26 @@ export default function GuardianSavedTutorsPage() {
     setSavedTutors((prev) => prev.filter((tutor) => tutor.id !== id));
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-  };
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
-  };
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
+  },
+};
 
   if (isLoading) {
     return (
@@ -77,7 +88,7 @@ export default function GuardianSavedTutorsPage() {
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
       <div className="border-b border-border pb-6">
         <h1 className="text-3xl font-bold font-[var(--font-space-grotesk)] text-foreground tracking-tight">Saved Tutors</h1>
-        <p className="text-muted-foreground mt-1">Tutors you've shortlisted for future opportunities.</p>
+        <p className="text-muted-foreground mt-1">Tutors you&apos;ve shortlisted for future opportunities.</p>
       </div>
 
       {savedTutors.length === 0 ? (

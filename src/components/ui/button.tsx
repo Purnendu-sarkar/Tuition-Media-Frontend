@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ComponentPropsWithoutRef, ReactNode } from "
 
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "default" | "primary" | "secondary" | "ghost" | "outline";
+type ButtonVariant = "default" | "primary" | "secondary" | "ghost" | "outline" |"destructive";
 type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -16,6 +16,8 @@ const variantClasses: Record<ButtonVariant, string> = {
   ghost: "bg-transparent text-foreground hover:bg-foreground/5 focus-visible:ring-primary/20",
   outline:
     "border border-border bg-background/80 text-foreground shadow-[0_12px_30px_-24px_rgba(15,23,42,0.6)] hover:bg-background focus-visible:ring-primary/20",
+   destructive:
+    "bg-red-500 text-white shadow-[0_20px_45px_-24px_rgba(220,38,38,0.8)] hover:bg-red-600 focus-visible:ring-red-300",  
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
