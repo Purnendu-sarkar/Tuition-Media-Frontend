@@ -5,12 +5,16 @@ interface ApiErrorShape {
 }
 
 async function request<TResponse>(path: string, init?: RequestInit) {
+  const isFormData = init?.body instanceof FormData;
+  
+  const headers = new Headers(init?.headers);
+  if (!isFormData && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   const response = await fetch(`${publicEnv.NEXT_PUBLIC_API_BASE_URL}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
     cache: "no-store",
   });
 
@@ -32,21 +36,21 @@ export const apiClient = {
   post<TResponse>(path: string, body: unknown, headers?: HeadersInit) {
     return request<TResponse>(path, {
       method: "POST",
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
       headers,
     });
   },
   put<TResponse>(path: string, body: unknown, headers?: HeadersInit) {
     return request<TResponse>(path, {
       method: "PUT",
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
       headers,
     });
   },
   patch<TResponse>(path: string, body: unknown, headers?: HeadersInit) {
     return request<TResponse>(path, {
       method: "PATCH",
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
       headers,
     });
   },

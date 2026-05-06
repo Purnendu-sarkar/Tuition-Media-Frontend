@@ -6,6 +6,10 @@ export interface VerificationDocument {
   idPhotoUrl: string;
   facePhotoUrl: string;
   aiRiskScore: number;
+  ipAddress?: string | null;
+  deviceFingerprint?: string | null;
+  extractedData?: any | null;
+  ocrConfidence?: number | null;
   status: "PENDING" | "APPROVED" | "REJECTED";
   adminComments: string | null;
   createdAt: string;
@@ -19,7 +23,7 @@ export interface VerificationDocument {
 }
 
 export const verificationApi = {
-  submitVerification: (token: string, data: { idPhotoUrl: string; facePhotoUrl: string }) => {
+  submitVerification: (token: string, data: FormData) => {
     return apiClient.post<{ id: string }>(
       "/api/v1/verification/submit",
       data,

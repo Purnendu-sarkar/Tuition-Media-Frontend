@@ -30,10 +30,13 @@ export default function AdminVerificationPage() {
   }, [status, session]);
 
   const fetchPending = async () => {
-    if (!session?.user?.accessToken) return;
+    if (!session?.accessToken) {
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
-      const res = await verificationApi.getPendingVerifications(session.user.accessToken);
+      const res = await verificationApi.getPendingVerifications(session.accessToken);
       setPending(res.pending);
     } catch (error) {
       console.error("Failed to fetch pending verifications", error);
@@ -43,10 +46,10 @@ export default function AdminVerificationPage() {
   };
 
   const handleReview = async (id: string, reviewStatus: "APPROVED" | "REJECTED") => {
-    if (!session?.user?.accessToken) return;
+    if (!session?.accessToken) return;
     try {
       setActionLoading(id);
-      await verificationApi.reviewVerification(session.user.accessToken, id, { status: reviewStatus });
+      await verificationApi.reviewVerification(session.accessToken, id, { status: reviewStatus });
       setPending(prev => prev.filter(doc => doc.id !== id));
     } catch (error) {
       console.error("Failed to review verification", error);
@@ -144,6 +147,18 @@ export default function AdminVerificationPage() {
                             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
                               {doc.aiRiskScore > 70 ? "High risk of manipulation or face mismatch detected." : doc.aiRiskScore > 30 ? "Medium risk. Please review documents carefully." : "Low risk. Faces appear to match and ID looks valid."}
                             </p>
+                            
+                            <div className="mt-4 pt-4 border-t border-border space-y-2">
+                              <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tracking & OCR Details</h5>
+                              <p className="text-sm"><strong>IP:</strong> {doc.ipAddress || "Unknown"}</p>
+                              <p className="text-sm"><strong>Device:</strong> {doc.deviceFingerprint?.slice(0,10) || "Unknown"}...</p>
+                              <p className="text-sm"><strong>OCR Confidence:</strong> {doc.ocrConfidence ? `${doc.ocrConfidence.toFixed(1)}%` : "N/A"}</p>
+                              {doc.extractedData && (
+                                <div className="mt-2 text-xs bg-muted/50 p-2 rounded-md max-h-24 overflow-y-auto">
+                                  <strong>Extracted Text:</strong> {doc.extractedData.text || JSON.stringify(doc.extractedData)}
+                                </div>
+                              )}
+                            </div>
                           </div>
                           
                           <div className="flex gap-3 mt-auto pt-4">

@@ -69,7 +69,7 @@ export function SigninForm({ allowGoogle }: SigninFormProps) {
           <label className="text-sm font-semibold text-foreground" htmlFor="signin-email">
             Email address
           </label>
-          <Input id="signin-email" type="email" placeholder="afiya@example.com" {...register("email")} />
+          <Input id="signin-email" type="email" placeholder="purnendu@example.com" {...register("email")} />
           {errors.email ? <p className="text-sm text-danger">{errors.email.message}</p> : null}
         </div>
 
