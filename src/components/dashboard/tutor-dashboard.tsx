@@ -157,18 +157,58 @@ export function TutorDashboard({ data }: TutorDashboardProps) {
         </motion.div>
       )}
 
-      {data.profileStatus.isProfileComplete && !data.profileStatus.isVerified && (
-        <motion.div variants={item} className="rounded-xl border border-blue-500/50 bg-blue-500/10 p-4 text-blue-500 flex items-start gap-3">
-          <ShieldCheckIcon className="h-5 w-5 shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold">Get Verified</h3>
-            <p className="text-sm opacity-90 mt-1">Boost your visibility by verifying your identity. Verified tutors get up to 3x more jobs.</p>
-            <Link href="/dashboard/verification">
-              <Button variant="outline" size="sm" className="mt-3 border-blue-500/50 hover:bg-blue-500/20 text-blue-500">
-                Start Verification
-              </Button>
-            </Link>
-          </div>
+      {/* Verification Status Banner */}
+      {!data.profileStatus.isVerified && (
+        <motion.div variants={item}>
+          <Card className={`p-4 border-l-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 ${
+            data.profileStatus.verificationStatus === "PENDING" 
+              ? "border-amber-500 bg-amber-500/5" 
+              : data.profileStatus.verificationStatus === "REJECTED"
+              ? "border-red-500 bg-red-500/5"
+              : "border-blue-500 bg-blue-500/5"
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-full ${
+                data.profileStatus.verificationStatus === "PENDING" 
+                  ? "bg-amber-500/10 text-amber-500" 
+                  : data.profileStatus.verificationStatus === "REJECTED"
+                  ? "bg-red-500/10 text-red-500"
+                  : "bg-blue-500/10 text-blue-500"
+              }`}>
+                {data.profileStatus.verificationStatus === "PENDING" ? (
+                  <ShieldCheckIcon className="h-6 w-6" />
+                ) : (
+                  <ShieldCheckIcon className="h-6 w-6" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  {data.profileStatus.verificationStatus === "PENDING" 
+                    ? "Verification Pending" 
+                    : data.profileStatus.verificationStatus === "REJECTED"
+                    ? "Verification Rejected"
+                    : "Get Verified"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {data.profileStatus.verificationStatus === "PENDING" 
+                    ? "Your documents are under review. This usually takes 1-2 business days." 
+                    : data.profileStatus.verificationStatus === "REJECTED"
+                    ? "Your verification was rejected. Please review and try again."
+                    : "Boost your visibility by verifying your identity. Verified tutors get up to 3x more jobs."}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant={data.profileStatus.verificationStatus === "REJECTED" ? "destructive" : "outline"}
+              asChild 
+              className={`shrink-0 gap-2 ${data.profileStatus.verificationStatus === null ? 'border-blue-500/50 hover:bg-blue-500/20 text-blue-500' : ''}`}
+            >
+              <Link href="/dashboard/verification">
+                {data.profileStatus.verificationStatus === "REJECTED" ? "Try Again" : "Start Verification"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </Card>
         </motion.div>
       )}
 

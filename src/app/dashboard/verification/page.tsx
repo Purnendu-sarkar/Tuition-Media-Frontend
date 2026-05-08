@@ -25,7 +25,7 @@ function base64ToFile(base64: string, filename: string) {
   return new File([u8arr], filename, { type: mime });
 }
 
-export default function TutorVerificationPage() {
+export default function IdentityVerificationPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   
@@ -46,7 +46,7 @@ export default function TutorVerificationPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/signin");
-    } else if (status === "authenticated" && session.user.role !== "TUTOR") {
+    } else if (status === "authenticated" && !["TUTOR", "GUARDIAN"].includes(session.user.role)) {
       router.push("/");
     } else if (status === "authenticated") {
       fetchMyVerification();

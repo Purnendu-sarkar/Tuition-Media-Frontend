@@ -15,8 +15,13 @@ import {
   FileText,
   Sparkles,
   Wand2,
-  BrainCircuit
+  BrainCircuit,
+  ShieldCheck,
+  ShieldAlert,
+  ArrowRight
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -159,6 +164,61 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
   return (
     <>
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">
+        {/* Verification Status Banner */}
+        {!data.stats.isVerified && (
+          <motion.div variants={item}>
+            <Card className={`p-4 border-l-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 ${
+              data.stats.verificationStatus === "PENDING" 
+                ? "border-amber-500 bg-amber-500/5" 
+                : data.stats.verificationStatus === "REJECTED"
+                ? "border-red-500 bg-red-500/5"
+                : "border-primary bg-primary/5"
+            }`}>
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-full ${
+                  data.stats.verificationStatus === "PENDING" 
+                    ? "bg-amber-500/10 text-amber-500" 
+                    : data.stats.verificationStatus === "REJECTED"
+                    ? "bg-red-500/10 text-red-500"
+                    : "bg-primary/10 text-primary"
+                }`}>
+                  {data.stats.verificationStatus === "PENDING" ? (
+                    <ShieldAlert className="h-6 w-6" />
+                  ) : (
+                    <ShieldCheck className="h-6 w-6" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">
+                    {data.stats.verificationStatus === "PENDING" 
+                      ? "Verification Pending" 
+                      : data.stats.verificationStatus === "REJECTED"
+                      ? "Verification Rejected"
+                      : "Verify Your Identity"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {data.stats.verificationStatus === "PENDING" 
+                      ? "Your documents are under review. This usually takes 1-2 business days." 
+                      : data.stats.verificationStatus === "REJECTED"
+                      ? "Your verification was rejected. Please review and try again."
+                      : "Unlock trust and premium features by verifying your account."}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={data.stats.verificationStatus === "REJECTED" ? "destructive" : "default"}
+                asChild 
+                className="shrink-0 gap-2"
+              >
+                <Link href="/dashboard/verification">
+                  {data.stats.verificationStatus === "REJECTED" ? "Try Again" : "Verify Now"}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </Card>
+          </motion.div>
+        )}
+
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold text-foreground">Overview</h2>
           <Button onClick={() => setIsModalOpen(true)} className="gap-2">

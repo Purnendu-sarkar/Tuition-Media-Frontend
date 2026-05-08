@@ -16,6 +16,7 @@ export interface DashboardStats {
   }[];
   profileStatus: {
     isVerified: boolean;
+    verificationStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
     isProfileComplete: boolean;
     completenessScore: number;
     missingSteps: string[];

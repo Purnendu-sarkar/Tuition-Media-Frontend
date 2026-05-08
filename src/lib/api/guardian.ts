@@ -5,6 +5,8 @@ export interface GuardianDashboardStats {
     totalPostedJobs: number;
     activeJobs: number;
     totalApplicants: number;
+    isVerified: boolean;
+    verificationStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
   };
   recentJobs: {
     id: string;
