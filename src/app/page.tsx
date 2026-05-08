@@ -4,7 +4,7 @@ import { ArrowRight, BadgeCheck, BrainCircuit, ShieldCheck, Sparkles } from "luc
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/ui/logo";
+import { PublicNavbar } from "@/components/layouts/public-navbar";
 
 const featureItems = [
   {
@@ -29,17 +29,7 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 py-8 md:px-10 lg:px-12">
-      <header className="flex items-center justify-between rounded-full border border-border bg-surface px-5 py-3 shadow-[0_20px_50px_-32px_rgba(15,23,42,0.45)] backdrop-blur">
-        <Logo />
-        <nav className="flex items-center gap-3">
-          <Link href="/signin" className="text-sm font-semibold text-muted-foreground transition hover:text-foreground">
-            Sign in
-          </Link>
-          <Button href={session?.user ? "/dashboard" : "/signup"} size="sm">
-            {session?.user ? "Go to dashboard" : "Create account"}
-          </Button>
-        </nav>
-      </header>
+      <PublicNavbar />
 
       <section className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[1.15fr_0.85fr] lg:py-20">
         <div className="space-y-8">
