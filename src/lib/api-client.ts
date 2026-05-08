@@ -12,18 +12,23 @@ async function request<TResponse>(path: string, init?: RequestInit) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${publicEnv.NEXT_PUBLIC_API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-    cache: "no-store",
-  });
+  try {
+    const response = await fetch(`${publicEnv.NEXT_PUBLIC_API_BASE_URL}${path}`, {
+      ...init,
+      headers,
+      cache: "no-store",
+    });
 
-  if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as ApiErrorShape | null;
-    throw new Error(errorBody?.message ?? "Request failed.");
+    if (!response.ok) {
+      const errorBody = (await response.json().catch(() => null)) as ApiErrorShape | null;
+      throw new Error(errorBody?.message ?? `Request failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as TResponse;
+  } catch (error: any) {
+    console.error(`API Request Failed [${path}]:`, error.message);
+    throw error;
   }
-
-  return (await response.json()) as TResponse;
 }
 
 export const apiClient = {

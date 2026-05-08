@@ -53,40 +53,47 @@ const providers: Provider[] = [
         return null;
       }
 
-      const response = await fetch(`${serverEnv.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/signin`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(parsedCredentials.data),
-        cache: "no-store",
-      });
+      try {
+        const response = await fetch(`${serverEnv.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/signin`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(parsedCredentials.data),
+          cache: "no-store",
+        });
 
-      if (!response.ok) {
-        return null;
-      }
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null);
+          console.error("Auth server responded with error:", errorData);
+          return null;
+        }
 
-      const payload = (await response.json()) as {
-        data: {
-          accessToken: string;
-          user: {
-            id: string;
-            name: string;
-            email: string;
-            role: "TUTOR" | "GUARDIAN" | "ADMIN";
-            image: string | null;
+        const payload = (await response.json()) as {
+          data: {
+            accessToken: string;
+            user: {
+              id: string;
+              name: string;
+              email: string;
+              role: "TUTOR" | "GUARDIAN" | "ADMIN";
+              image: string | null;
+            };
           };
         };
-      };
 
-      return {
-        id: payload.data.user.id,
-        name: payload.data.user.name,
-        email: payload.data.user.email,
-        image: payload.data.user.image,
-        role: payload.data.user.role,
-        accessToken: payload.data.accessToken,
-      };
+        return {
+          id: payload.data.user.id,
+          name: payload.data.user.name,
+          email: payload.data.user.email,
+          image: payload.data.user.image,
+          role: payload.data.user.role,
+          accessToken: payload.data.accessToken,
+        };
+      } catch (error: any) {
+        console.error("Fetch error in authorize:", error.message);
+        return null;
+      }
     },
   }),
 ];

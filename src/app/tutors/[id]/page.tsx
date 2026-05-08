@@ -122,9 +122,26 @@ export default function TutorPublicProfilePage() {
               </div>
 
               <h1 className="text-3xl font-black mb-2 tracking-tight">{tutor.name}</h1>
-              <p className="text-muted-foreground font-medium mb-6 flex items-center justify-center gap-2">
+              <p className="text-muted-foreground font-medium mb-4 flex items-center justify-center gap-2">
                 <MapPin className="h-4 w-4" /> {tutor.tutorProfile.location || "Remote / Online"}
               </p>
+
+              {/* Smart Badges */}
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
+                {(tutor as any).badges?.map((badge: any) => (
+                  <Badge 
+                    key={badge.id}
+                    className={`
+                      ${badge.color === 'blue' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
+                      ${badge.color === 'gold' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : ''}
+                      ${badge.color === 'purple' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' : ''}
+                      font-bold text-[10px] px-2 py-0.5 rounded-full border shadow-sm
+                    `}
+                  >
+                    {badge.label}
+                  </Badge>
+                ))}
+              </div>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">

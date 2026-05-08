@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import type { GuardianDashboardStats, CreateJobData, Application } from "@/lib/api/guardian";
 import { guardianApi } from "@/lib/api/guardian";
 import { aiApi } from "@/lib/api/ai";
+import { reviewApi } from "@/lib/api/review";
 
 interface GuardianDashboardProps {
   initialData: GuardianDashboardStats;
@@ -71,6 +72,14 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
   // AI Generation States
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Review States
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewTutorId, setReviewTutorId] = useState<string | null>(null);
+  const [reviewJobId, setReviewJobId] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -158,6 +167,27 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
       console.error("Failed to update application:", err);
     } finally {
       setAppActionLoading(null);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewTutorId) return;
+    setIsSubmittingReview(true);
+    try {
+      await reviewApi.createReview(token, {
+        rating: reviewRating,
+        comment: reviewComment,
+        revieweeId: reviewTutorId,
+        jobId: reviewJobId || undefined
+      });
+      setIsReviewModalOpen(false);
+      setReviewComment("");
+      setReviewRating(5);
+      alert("Thank you for your feedback!");
+    } catch (err: any) {
+      alert(err.message || "Failed to submit review");
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -529,9 +559,27 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                                     {appActionLoading === app.id ? "..." : "Accept"}
                                   </Button>
                                 </>
+                              ) : app.status === "ACCEPTED" ? (
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                                    ACCEPTED
+                                  </span>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="gap-1 text-xs"
+                                    onClick={() => {
+                                      setReviewTutorId(app.tutorId);
+                                      setReviewJobId(app.jobId);
+                                      setIsReviewModalOpen(true);
+                                    }}
+                                  >
+                                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Rate
+                                  </Button>
+                                </div>
                               ) : (
-                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${app.status === "ACCEPTED" ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                                  {app.status}
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-red-500/10 text-red-500 border-red-500/20`}>
+                                  REJECTED
                                 </span>
                               )}
                             </div>
@@ -546,6 +594,67 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                     ))}
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Review Modal */}
+      <AnimatePresence>
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isSubmittingReview && setIsReviewModalOpen(false)}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Rate Your Tutor</h2>
+                <button onClick={() => setIsReviewModalOpen(false)} className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6 text-center">
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setReviewRating(s)}
+                      className="transition-transform active:scale-90"
+                    >
+                      <Star
+                        className={`h-10 w-10 ${s <= reviewRating ? 'fill-amber-500 text-amber-500' : 'text-muted'}`}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <label className="text-sm font-medium">Your Feedback (Optional)</label>
+                  <textarea
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    placeholder="Tell others about your experience with this tutor..."
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                  />
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <Button variant="ghost" className="flex-1" onClick={() => setIsReviewModalOpen(false)} disabled={isSubmittingReview}>Cancel</Button>
+                  <Button className="flex-1" onClick={handleSubmitReview} disabled={isSubmittingReview}>
+                    {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </div>

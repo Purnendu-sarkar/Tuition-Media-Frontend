@@ -287,17 +287,53 @@ export default function TutorsSearchPage() {
 
                 {/* Pagination */}
                 {pagination && pagination.pages > 1 && (
-                  <div className="mt-12 flex justify-center gap-2">
-                    {Array.from({ length: pagination.pages }).map((_, i) => (
-                      <Button
-                        key={i}
-                        variant={filters.page === i + 1 ? "default" : "outline"}
-                        className="w-10 h-10 p-0 rounded-xl"
-                        onClick={() => handleFilterChange("page", i + 1)}
-                      >
-                        {i + 1}
-                      </Button>
-                    ))}
+                  <div className="mt-16 flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="rounded-xl h-11 w-11"
+                      onClick={() => handleFilterChange("page", Math.max(1, filters.page - 1))}
+                      disabled={filters.page === 1}
+                    >
+                      <ArrowRight className="h-4 w-4 rotate-180" />
+                    </Button>
+                    
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: Math.min(5, pagination.pages) }).map((_, i) => {
+                        // Simple sliding window for pagination if many pages
+                        let pageNum = i + 1;
+                        if (pagination.pages > 5 && filters.page > 3) {
+                          pageNum = filters.page - 3 + i;
+                          if (pageNum + (5 - i) > pagination.pages) {
+                            pageNum = pagination.pages - 4 + i;
+                          }
+                        }
+                        
+                        if (pageNum > 0 && pageNum <= pagination.pages) {
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={filters.page === pageNum ? "default" : "outline"}
+                              className={`h-11 w-11 rounded-xl font-bold transition-all ${filters.page === pageNum ? 'shadow-lg shadow-primary/20 scale-110' : ''}`}
+                              onClick={() => handleFilterChange("page", pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="rounded-xl h-11 w-11"
+                      onClick={() => handleFilterChange("page", Math.min(pagination.pages, filters.page + 1))}
+                      disabled={filters.page === pagination.pages}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 )}
               </>
