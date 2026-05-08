@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
+import Link from "next/link";
+import { div } from "framer-motion/client";
 
 const container = {
   hidden: { opacity: 0 },
@@ -499,12 +501,17 @@ export default function PublicJobsPage() {
                         <p className="text-muted-foreground text-sm">Please login as a Tutor to apply for this tuition job.</p>
                       </div>
                       <div className="flex gap-4 px-6">
-                        <Button className="flex-1 h-12 rounded-xl" asChild>
-                          <a href="/signin">Sign In</a>
-                        </Button>
-                        <Button variant="outline" className="flex-1 h-12 rounded-xl" asChild>
-                          <a href="/signup">Sign Up</a>
-                        </Button>
+                        <Link href="/signin" className="flex-1">
+                          <Button className="w-full h-12 rounded-xl">
+                            Sign In
+                          </Button>
+                        </Link>
+
+                        <Link href="/signup" className="flex-1">
+                          <Button variant="outline" className="w-full h-12 rounded-xl">
+                            Sign Up
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   ) : session.user.role !== "TUTOR" ? (

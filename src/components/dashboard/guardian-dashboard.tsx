@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Briefcase, 
-  Users, 
-  CheckCircle2, 
+import {
+  Briefcase,
+  Users,
+  CheckCircle2,
   Plus,
   X,
   MapPin,
@@ -95,11 +95,11 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
         ...formData,
         budget: formData.budget ? Number(formData.budget) : undefined
       });
-      
+
       // Refresh dashboard data
       const updatedData = await guardianApi.getDashboardStats(token);
       setData(updatedData);
-      
+
       setIsModalOpen(false);
       setFormData({ title: "", description: "", budget: undefined, location: "" });
     } catch (err: any) {
@@ -111,7 +111,7 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
 
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim()) return;
-    
+
     setIsGenerating(true);
     try {
       const generated = await aiApi.generateJobPost(token, aiPrompt);
@@ -145,10 +145,10 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
     try {
       setAppActionLoading(appId);
       await guardianApi.updateApplicationStatus(token, appId, status);
-      
+
       // Update local state
       setApplications(prev => prev.map(app => app.id === appId ? { ...app, status } : app));
-      
+
       // Refresh dashboard stats if we accepted (which might change job status)
       if (status === "ACCEPTED") {
         const updatedData = await guardianApi.getDashboardStats(token);
@@ -167,21 +167,19 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
         {/* Verification Status Banner */}
         {!data.stats.isVerified && (
           <motion.div variants={item}>
-            <Card className={`p-4 border-l-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 ${
-              data.stats.verificationStatus === "PENDING" 
-                ? "border-amber-500 bg-amber-500/5" 
+            <Card className={`p-4 border-l-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 ${data.stats.verificationStatus === "PENDING"
+                ? "border-amber-500 bg-amber-500/5"
                 : data.stats.verificationStatus === "REJECTED"
-                ? "border-red-500 bg-red-500/5"
-                : "border-primary bg-primary/5"
-            }`}>
+                  ? "border-red-500 bg-red-500/5"
+                  : "border-primary bg-primary/5"
+              }`}>
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-full ${
-                  data.stats.verificationStatus === "PENDING" 
-                    ? "bg-amber-500/10 text-amber-500" 
+                <div className={`p-3 rounded-full ${data.stats.verificationStatus === "PENDING"
+                    ? "bg-amber-500/10 text-amber-500"
                     : data.stats.verificationStatus === "REJECTED"
-                    ? "bg-red-500/10 text-red-500"
-                    : "bg-primary/10 text-primary"
-                }`}>
+                      ? "bg-red-500/10 text-red-500"
+                      : "bg-primary/10 text-primary"
+                  }`}>
                   {data.stats.verificationStatus === "PENDING" ? (
                     <ShieldAlert className="h-6 w-6" />
                   ) : (
@@ -190,31 +188,30 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    {data.stats.verificationStatus === "PENDING" 
-                      ? "Verification Pending" 
+                    {data.stats.verificationStatus === "PENDING"
+                      ? "Verification Pending"
                       : data.stats.verificationStatus === "REJECTED"
-                      ? "Verification Rejected"
-                      : "Verify Your Identity"}
+                        ? "Verification Rejected"
+                        : "Verify Your Identity"}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {data.stats.verificationStatus === "PENDING" 
-                      ? "Your documents are under review. This usually takes 1-2 business days." 
+                    {data.stats.verificationStatus === "PENDING"
+                      ? "Your documents are under review. This usually takes 1-2 business days."
                       : data.stats.verificationStatus === "REJECTED"
-                      ? "Your verification was rejected. Please review and try again."
-                      : "Unlock trust and premium features by verifying your account."}
+                        ? "Your verification was rejected. Please review and try again."
+                        : "Unlock trust and premium features by verifying your account."}
                   </p>
                 </div>
               </div>
-              <Button 
-                variant={data.stats.verificationStatus === "REJECTED" ? "destructive" : "default"}
-                asChild 
-                className="shrink-0 gap-2"
-              >
-                <Link href="/dashboard/verification">
+              <Link href="/dashboard/verification" className="shrink-0">
+                <Button
+                  variant={data.stats.verificationStatus === "REJECTED" ? "destructive" : "default"}
+                  className="gap-2"
+                >
                   {data.stats.verificationStatus === "REJECTED" ? "Try Again" : "Verify Now"}
                   <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </Card>
           </motion.div>
         )}
@@ -290,7 +287,7 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                             {job.budget ? `৳${job.budget.toLocaleString()}` : 'Negotiable'}
                           </td>
                           <td className="px-6 py-4">
-                            <button 
+                            <button
                               onClick={() => handleViewApplications(job.id)}
                               className="inline-flex items-center gap-1 text-primary font-medium hover:bg-primary/10 px-2 py-1 rounded transition-colors"
                             >
@@ -323,16 +320,16 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
               className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-2xl"
             >
@@ -356,14 +353,14 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                   <Sparkles className="h-4 w-4" /> AI Magic Generator
                 </label>
                 <div className="flex gap-2">
-                  <Input 
-                    placeholder="E.g., Need a math tutor for class 10, 3 days a week" 
+                  <Input
+                    placeholder="E.g., Need a math tutor for class 10, 3 days a week"
                     value={aiPrompt}
                     onChange={e => setAiPrompt(e.target.value)}
                     className="border-primary/20 bg-background/60 focus-visible:ring-primary/30"
                   />
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     onClick={handleAiGenerate}
                     disabled={isGenerating || !aiPrompt.trim()}
                     className="shrink-0 shadow-[0_0_15px_rgba(15,118,110,0.25)] transition-all"
@@ -377,22 +374,22 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
               <form onSubmit={handleCreateJob} className="space-y-4">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-medium">Job Title <span className="text-red-500">*</span></label>
-                  <Input 
-                    id="title" 
-                    placeholder="e.g. Need a Math tutor for class 10" 
+                  <Input
+                    id="title"
+                    placeholder="e.g. Need a Math tutor for class 10"
                     value={formData.title}
                     onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
                     required
                     minLength={5}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label htmlFor="description" className="text-sm font-medium">Description <span className="text-red-500">*</span></label>
-                  <textarea 
-                    id="description" 
+                  <textarea
+                    id="description"
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="Describe the student's needs, schedule, and any specific requirements..." 
+                    placeholder="Describe the student's needs, schedule, and any specific requirements..."
                     value={formData.description}
                     onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
                     required
@@ -403,22 +400,22 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="budget" className="text-sm font-medium">Monthly Budget (৳)</label>
-                    <Input 
-                      id="budget" 
+                    <Input
+                      id="budget"
                       type="number"
-                      placeholder="e.g. 5000" 
+                      placeholder="e.g. 5000"
                       value={formData.budget || ""}
                       onChange={e => setFormData(p => ({ ...p, budget: e.target.value ? Number(e.target.value) : undefined }))}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <label htmlFor="location" className="text-sm font-medium">Location</label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        id="location" 
-                        placeholder="e.g. Dhanmondi, Dhaka" 
+                      <Input
+                        id="location"
+                        placeholder="e.g. Dhanmondi, Dhaka"
                         className="pl-9"
                         value={formData.location || ""}
                         onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
@@ -442,16 +439,16 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
       <AnimatePresence>
         {isAppModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsAppModalOpen(false)}
               className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-3xl rounded-2xl border border-border bg-surface p-6 shadow-2xl max-h-[85vh] flex flex-col"
             >
@@ -485,18 +482,17 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex-grow min-w-0">
                           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
                             <div>
                               <div className="flex items-center gap-3">
                                 <h3 className="font-semibold text-lg text-foreground">{app.tutor.name}</h3>
                                 {app.matchScore && (
-                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                                    app.matchScore >= 80 ? 'bg-primary/10 text-primary border-primary/20' : 
-                                    app.matchScore >= 60 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                                    'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
-                                  }`}>
+                                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${app.matchScore >= 80 ? 'bg-primary/10 text-primary border-primary/20' :
+                                      app.matchScore >= 60 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                        'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
+                                    }`}>
                                     <BrainCircuit className="h-3 w-3" />
                                     {app.matchScore}% Match
                                   </span>
@@ -511,20 +507,20 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                                 )}
                               </div>
                             </div>
-                            
+
                             <div className="flex gap-2">
                               {app.status === "PENDING" ? (
                                 <>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline" 
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
                                     className="border-red-500/20 text-red-500 hover:bg-red-500/10 hover:text-red-500"
                                     onClick={() => handleUpdateApplicationStatus(app.id, "REJECTED")}
                                     disabled={appActionLoading !== null}
                                   >
                                     {appActionLoading === app.id ? "..." : "Reject"}
                                   </Button>
-                                  <Button 
+                                  <Button
                                     size="sm"
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                     onClick={() => handleUpdateApplicationStatus(app.id, "ACCEPTED")}
@@ -540,7 +536,7 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="mt-4 text-sm text-muted-foreground bg-muted/10 p-4 rounded-lg border border-border/50">
                             <span className="block font-medium mb-1 text-foreground/80">Cover Letter:</span>
                             <p className="whitespace-pre-wrap">{app.coverLetter || "No cover letter provided."}</p>

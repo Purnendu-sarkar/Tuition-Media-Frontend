@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useSession } from "next-auth/react";
 import { Search, Briefcase, User, LogIn, LayoutDashboard, Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -13,10 +14,14 @@ export function PublicNavbar() {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navLinks = [
-    { name: "Find Tutors", href: "/tutors", icon: Search },
-    { name: "Tuition Jobs", href: "/jobs", icon: Briefcase },
-  ];
+  const navLinks: {
+    name: string;
+    href: Route;
+    icon: any;
+  }[] = [
+      { name: "Find Tutors", href: "/tutors", icon: Search },
+      { name: "Tuition Jobs", href: "/jobs", icon: Briefcase },
+    ];
 
   return (
     <header className="fixed top-4 inset-x-4 z-50">
@@ -26,9 +31,9 @@ export function PublicNavbar() {
             <Logo />
             <div className="hidden md:flex items-center gap-6">
               {navLinks.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href} 
+                <Link
+                  key={link.href}
+                  href={link.href}
                   className="text-sm font-semibold text-muted-foreground transition hover:text-primary flex items-center gap-2"
                 >
                   <link.icon className="h-4 w-4" />
@@ -54,8 +59,8 @@ export function PublicNavbar() {
                 </Button>
               </>
             )}
-            
-            <button 
+
+            <button
               className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -76,9 +81,9 @@ export function PublicNavbar() {
           >
             <div className="flex flex-col gap-6">
               {navLinks.map((link) => (
-                <Link 
-                  key={link.href} 
-                  href={link.href} 
+                <Link
+                  key={link.href}
+                  href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center gap-4 text-lg font-bold text-muted-foreground hover:text-primary transition-colors"
                 >
