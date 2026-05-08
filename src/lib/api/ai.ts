@@ -30,4 +30,24 @@ export const aiApi = {
       }
     );
   },
+  
+  generateInterview: (token: string, subject: string) => {
+    return apiClient.post<{ questions: string[] }>(
+      "/api/v1/ai/interview",
+      { subject },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+  },
+
+  generateResources: (token: string, subject: string) => {
+    return apiClient.post<{ guide: string }>(
+      "/api/v1/ai/resources",
+      { subject },
+      {
+        Authorization: `Bearer ${token}`,
+      }
+    );
+  },
 };

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase,
   Eye,
@@ -11,16 +12,26 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  ShieldCheck as ShieldCheckIcon
+  ShieldCheck as ShieldCheckIcon,
+  BrainCircuit,
+  Sparkles,
+  Wand2,
+  BookOpen,
+  MessageSquare,
+  Search,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { DashboardStats } from "@/lib/api/tutor";
+import { aiApi } from "@/lib/api/ai";
 
 interface TutorDashboardProps {
   data: DashboardStats;
+  token: string;
 }
 
 const container = {
@@ -38,7 +49,17 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-export function TutorDashboard({ data }: TutorDashboardProps) {
+export function TutorDashboard({ data, token }: TutorDashboardProps) {
+  // AI Interview States
+  const [interviewSubject, setInterviewSubject] = useState("");
+  const [interviewQuestions, setInterviewQuestions] = useState<string[]>([]);
+  const [isInterviewLoading, setIsInterviewLoading] = useState(false);
+
+  // AI Resources States
+  const [resourceSubject, setResourceSubject] = useState("");
+  const [resourceGuide, setResourceGuide] = useState<string | null>(null);
+  const [isResourceLoading, setIsResourceLoading] = useState(false);
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "ACCEPTED":
@@ -65,12 +86,40 @@ export function TutorDashboard({ data }: TutorDashboardProps) {
     }
   };
 
+  const handleGenerateInterview = async () => {
+    if (!interviewSubject.trim()) return;
+    setIsInterviewLoading(true);
+    setInterviewQuestions([]);
+    try {
+      const res = await aiApi.generateInterview(token, interviewSubject);
+      setInterviewQuestions(res.questions);
+    } catch (err) {
+      console.error("Failed to generate interview:", err);
+    } finally {
+      setIsInterviewLoading(false);
+    }
+  };
+
+  const handleGenerateResources = async () => {
+    if (!resourceSubject.trim()) return;
+    setIsResourceLoading(true);
+    setResourceGuide(null);
+    try {
+      const res = await aiApi.generateResources(token, resourceSubject);
+      setResourceGuide(res.guide);
+    } catch (err) {
+      console.error("Failed to generate resources:", err);
+    } finally {
+      setIsResourceLoading(false);
+    }
+  };
+
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="show"
-      className="space-y-8"
+      className="space-y-8 pb-20"
     >
       {!data.profileStatus.isProfileComplete && (
         <motion.div variants={item}>
@@ -259,57 +308,167 @@ export function TutorDashboard({ data }: TutorDashboardProps) {
         </motion.div>
       </div>
 
-      <motion.div variants={item}>
-        <Card className="border-border bg-surface overflow-hidden">
-          <div className="p-6 border-b border-border flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Recent Applications</h2>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-              View All <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-          <div className="p-0">
-            {data.recentApplications.length > 0 ? (
-              <div className="w-full overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-muted-foreground uppercase bg-muted/20 border-b border-border">
-                    <tr>
-                      <th className="px-6 py-4 font-medium">Job Title</th>
-                      <th className="px-6 py-4 font-medium">Budget</th>
-                      <th className="px-6 py-4 font-medium">Applied Date</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.recentApplications.map((app) => (
-                      <tr key={app.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
-                        <td className="px-6 py-4 font-medium text-foreground">{app.jobTitle}</td>
-                        <td className="px-6 py-4 text-muted-foreground">
-                          {app.budget ? `৳${app.budget.toLocaleString()}` : 'Negotiable'}
-                        </td>
-                        <td className="px-6 py-4 text-muted-foreground">
-                          {new Date(app.appliedAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(app.status)}`}>
-                            {getStatusIcon(app.status)}
-                            {app.status}
-                          </span>
-                        </td>
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Recent Applications - Takes 2 cols on large */}
+        <motion.div variants={item} className="lg:col-span-2">
+          <Card className="h-full border-border bg-surface overflow-hidden">
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Recent Applications</h2>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-0">
+              {data.recentApplications.length > 0 ? (
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-muted-foreground uppercase bg-muted/20 border-b border-border">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">Job Title</th>
+                        <th className="px-6 py-4 font-medium">Budget</th>
+                        <th className="px-6 py-4 font-medium">Applied Date</th>
+                        <th className="px-6 py-4 font-medium">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-muted-foreground">
-                <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                <p>You haven&apos;t applied to any jobs yet.</p>
-                <Button className="mt-4" variant="outline">Browse Jobs</Button>
-              </div>
-            )}
-          </div>
-        </Card>
-      </motion.div>
+                    </thead>
+                    <tbody>
+                      {data.recentApplications.map((app) => (
+                        <tr key={app.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
+                          <td className="px-6 py-4 font-medium text-foreground">{app.jobTitle}</td>
+                          <td className="px-6 py-4 text-muted-foreground">
+                            {app.budget ? `৳${app.budget.toLocaleString()}` : 'Negotiable'}
+                          </td>
+                          <td className="px-6 py-4 text-muted-foreground">
+                            {new Date(app.appliedAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(app.status)}`}>
+                              {getStatusIcon(app.status)}
+                              {app.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                  <p>You haven&apos;t applied to any jobs yet.</p>
+                  <Button className="mt-4" variant="outline">Browse Jobs</Button>
+                </div>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* AI Toolkit - Takes 1 col */}
+        <motion.div variants={item} className="space-y-6">
+          <Card className="p-6 border-primary/20 bg-primary/5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none -mr-10 -mt-10" />
+            <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
+              <Sparkles className="h-5 w-5 text-primary" /> AI Power Tools
+            </h2>
+
+            <div className="space-y-4">
+               {/* Interview Prep */}
+               <div className="space-y-3">
+                  <label className="text-sm font-semibold flex items-center gap-2">
+                     <BrainCircuit className="h-4 w-4 text-primary" /> AI Interview Prep
+                  </label>
+                  <div className="flex gap-2">
+                     <Input 
+                        placeholder="Subject (e.g. Physics)" 
+                        value={interviewSubject}
+                        onChange={e => setInterviewSubject(e.target.value)}
+                        className="bg-background/50 h-11"
+                     />
+                     <Button 
+                        size="icon" 
+                        className="shrink-0 h-11 w-11"
+                        onClick={handleGenerateInterview}
+                        disabled={isInterviewLoading || !interviewSubject}
+                     >
+                        {isInterviewLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                     </Button>
+                  </div>
+                  <AnimatePresence>
+                    {interviewQuestions.length > 0 && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="space-y-2 mt-4 p-4 rounded-xl bg-background/80 border border-primary/10"
+                      >
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Practice Questions</h4>
+                        {interviewQuestions.map((q, i) => (
+                           <div key={i} className="flex gap-2 text-sm text-muted-foreground group/q">
+                              <span className="text-primary font-bold">{i+1}.</span>
+                              <p className="group-hover/q:text-foreground transition-colors">{q}</p>
+                           </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+               </div>
+
+               <div className="h-px bg-primary/10 my-4" />
+
+               {/* Learning Resources */}
+               <div className="space-y-3">
+                  <label className="text-sm font-semibold flex items-center gap-2">
+                     <BookOpen className="h-4 w-4 text-primary" /> Teaching Guide
+                  </label>
+                  <div className="flex gap-2">
+                     <Input 
+                        placeholder="Topic (e.g. Calculus)" 
+                        value={resourceSubject}
+                        onChange={e => setResourceSubject(e.target.value)}
+                        className="bg-background/50 h-11"
+                     />
+                     <Button 
+                        size="icon" 
+                        variant="outline"
+                        className="shrink-0 h-11 w-11 border-primary/20 hover:bg-primary/5"
+                        onClick={handleGenerateResources}
+                        disabled={isResourceLoading || !resourceSubject}
+                     >
+                        {isResourceLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />}
+                     </Button>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {resourceGuide && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="mt-4 p-4 rounded-xl bg-background/80 border border-primary/10 text-sm whitespace-pre-wrap text-muted-foreground leading-relaxed custom-scrollbar max-h-60 overflow-y-auto"
+                      >
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-3">AI Teaching Tips</h4>
+                        {resourceGuide}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+               </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-border bg-surface hover:shadow-lg transition-all duration-300">
+             <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                   <MessageSquare className="h-6 w-6" />
+                </div>
+                <div>
+                   <h3 className="font-bold">Smart Alerts</h3>
+                   <p className="text-xs text-muted-foreground">AI matching is active</p>
+                </div>
+             </div>
+             <p className="text-sm text-muted-foreground">
+                You'll automatically receive notifications when jobs matching your skills are posted. 
+                <span className="text-primary font-semibold"> 12 matched today.</span>
+             </p>
+          </Card>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

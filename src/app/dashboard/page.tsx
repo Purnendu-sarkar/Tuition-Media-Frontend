@@ -55,7 +55,7 @@ export default async function DashboardPage() {
         </div>
       ) : dashboardData ? (
         session.user.role === "TUTOR" ? (
-          <TutorDashboard data={dashboardData as any} />
+          <TutorDashboard data={dashboardData as any} token={session.accessToken!} />
         ) : (
           <GuardianDashboard initialData={dashboardData as any} token={session.accessToken!} />
         )
