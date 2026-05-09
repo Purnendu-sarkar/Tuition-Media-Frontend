@@ -109,6 +109,28 @@ body {
   font-family: var(--font-manrope), sans-serif;
 }
 
+.glass {
+  @apply bg-surface/80 backdrop-blur-md border border-border/50 shadow-xl;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-primary to-primary-strong bg-clip-text text-transparent;
+}
+
+.hero-gradient {
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08), transparent 70%);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
 a {
   color: inherit;
   text-decoration: none;

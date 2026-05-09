@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import type { ButtonHTMLAttributes, ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -28,7 +29,9 @@ const sizeClasses: Record<ButtonSize, string> = {
   "icon-sm": "h-9 w-9 p-0",
 };
 
-interface SharedButtonProps {
+
+
+type SharedButtonProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
@@ -37,8 +40,8 @@ interface SharedButtonProps {
 
 type NativeButtonProps = SharedButtonProps & ButtonHTMLAttributes<HTMLButtonElement>;
 type LinkButtonProps = SharedButtonProps &
-  ComponentPropsWithoutRef<typeof Link> & {
-    href: string;
+  Omit<ComponentPropsWithoutRef<typeof Link>, "href"> & {
+    href: string | Route | any;
   };
 
 function getButtonClasses({
