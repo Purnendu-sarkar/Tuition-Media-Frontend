@@ -30,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className={`${manrope.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased`}>
+    <html lang="en" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
+      <body className={`${manrope.variable} ${spaceGrotesk.variable} bg-background text-foreground antialiased`} suppressHydrationWarning>
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

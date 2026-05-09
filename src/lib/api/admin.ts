@@ -37,6 +37,36 @@ export interface AdminJob {
   };
 }
 
+export interface AdminReport {
+  id: string;
+  reporterId: string;
+  reporter: { id: string; name: string; email: string; role: string };
+  reportedId: string | null;
+  reported: { id: string; name: string; email: string; role: string } | null;
+  reason: string;
+  description: string;
+  status: "PENDING" | "REVIEWING" | "RESOLVED" | "DISMISSED";
+  createdAt: string;
+}
+
+export interface AdminTicket {
+  id: string;
+  userId: string;
+  user: { id: string; name: string; email: string };
+  subject: string;
+  description: string;
+  status: "OPEN" | "IN_PROGRESS" | "CLOSED";
+  createdAt: string;
+  updatedAt: string;
+  messages: {
+    id: string;
+    content: string;
+    senderId: string;
+    isAdmin: boolean;
+    createdAt: string;
+  }[];
+}
+
 export const adminApi = {
   getStats: (token: string) => {
     return apiClient.get<AdminStats>("/api/v1/admin/stats", {
@@ -65,6 +95,36 @@ export const adminApi = {
 
   deleteJob: (token: string, jobId: string) => {
     return apiClient.delete<{ message: string }>(`/api/v1/admin/jobs/${jobId}`, {
+      Authorization: `Bearer ${token}`
+    });
+  },
+
+  getReports: (token: string) => {
+    return apiClient.get<{ reports: AdminReport[] }>("/api/v1/admin/reports", {
+      Authorization: `Bearer ${token}`
+    });
+  },
+
+  updateReportStatus: (token: string, id: string, status: string) => {
+    return apiClient.patch<{ report: AdminReport }>(`/api/v1/admin/reports/${id}`, { status }, {
+      Authorization: `Bearer ${token}`
+    });
+  },
+
+  getTickets: (token: string) => {
+    return apiClient.get<{ tickets: AdminTicket[] }>("/api/v1/admin/tickets", {
+      Authorization: `Bearer ${token}`
+    });
+  },
+
+  updateTicketStatus: (token: string, id: string, status: string) => {
+    return apiClient.patch<{ ticket: AdminTicket }>(`/api/v1/admin/tickets/${id}`, { status }, {
+      Authorization: `Bearer ${token}`
+    });
+  },
+
+  addTicketMessage: (token: string, id: string, content: string) => {
+    return apiClient.post<{ message: any }>(`/api/v1/admin/tickets/${id}/messages`, { content }, {
       Authorization: `Bearer ${token}`
     });
   }

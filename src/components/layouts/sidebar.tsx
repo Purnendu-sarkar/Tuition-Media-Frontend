@@ -68,6 +68,7 @@ export function Sidebar({ role, className = "" }: SidebarProps) {
           { label: "Guardians", href: "/admin/users/guardians", icon: Users },
           { label: "Verifications", href: "/admin/verifications", icon: ShieldCheck },
           { label: "Moderation", href: "/admin/moderation/reports", icon: Flag },
+          { label: "Support Inbox", href: "/admin/support/tickets", icon: HelpCircle },
           { label: "Fraud Detection", href: "/admin/moderation/fraud", icon: ShieldAlert },
           { label: "Finance", href: "/admin/finance", icon: Wallet },
         ];

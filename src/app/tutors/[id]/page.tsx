@@ -15,7 +15,8 @@ import {
   Share2,
   CheckCircle2,
   BrainCircuit,
-  MessageSquare
+  MessageSquare,
+  AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
@@ -160,6 +161,13 @@ export default function TutorPublicProfilePage() {
                 </Button>
                 <Button variant="outline" className="w-full h-12 rounded-xl gap-2">
                   <Calendar className="h-4 w-4" /> Schedule Lesson
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-12 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-500/10 gap-2"
+                  onClick={() => router.push(`/support/report?reportedId=${tutor.id}`)}
+                >
+                  <AlertTriangle className="h-4 w-4" /> Report User
                 </Button>
               </div>
             </Card>

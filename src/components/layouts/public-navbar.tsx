@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useSession } from "next-auth/react";
-import { Search, Briefcase, User, LogIn, LayoutDashboard, Menu, X } from "lucide-react";
+import { Search, Briefcase, User, LogIn, LayoutDashboard, Menu, X, HelpCircle } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,6 +21,7 @@ export function PublicNavbar() {
   }[] = [
       { name: "Find Tutors", href: "/tutors", icon: Search },
       { name: "Tuition Jobs", href: "/jobs", icon: Briefcase },
+      { name: "Support", href: "/support", icon: HelpCircle },
     ];
 
   return (
