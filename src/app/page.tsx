@@ -319,32 +319,32 @@ export default async function HomePage() {
       </section>
 
       {/* 6. Support & Safety */}
-      <section className="py-24 px-6 bg-primary text-white overflow-hidden relative">
+      <section className="py-24 px-6 bg-primary text-primary-foreground overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
         <div className="container mx-auto max-w-7xl relative">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
-              <div className="h-16 w-16 rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-                <Shield className="h-8 w-8 text-white" />
+              <div className="h-16 w-16 rounded-3xl bg-primary-foreground/10 backdrop-blur-md flex items-center justify-center">
+                <Shield className="h-8 w-8 text-primary-foreground" />
               </div>
               <h2 className="text-4xl md:text-5xl font-black font-[var(--font-space-grotesk)] leading-tight">
                 Your <span className="text-secondary">Safety</span> is <br />
                 Our Top Priority.
               </h2>
-              <p className="text-lg text-white/70 leading-relaxed">
+              <p className="text-lg text-primary-foreground/70 leading-relaxed">
                 We built a comprehensive safety suite so you can focus on learning. From 24/7 support to verified profiles and secure escrow payments.
               </p>
               <div className="grid grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
                   <div className="font-bold text-xl">24/7 Help Center</div>
-                  <p className="text-sm text-white/60 leading-relaxed">Instant answers to your questions and live support chat whenever you need it.</p>
+                  <p className="text-sm text-primary-foreground/60 leading-relaxed">Instant answers to your questions and live support chat whenever you need it.</p>
                 </div>
                 <div className="space-y-2">
                   <div className="font-bold text-xl">Identity Verification</div>
-                  <p className="text-sm text-white/60 leading-relaxed">We use advanced AI and document checks to verify every tutor on our platform.</p>
+                  <p className="text-sm text-primary-foreground/60 leading-relaxed">We use advanced AI and document checks to verify every tutor on our platform.</p>
                 </div>
               </div>
-              <Button variant="outline" href="/support" className="border-white/20 text-white hover:bg-white hover:text-primary rounded-xl h-14 px-8 font-bold">
+              <Button variant="outline" href="/support" className="!bg-white !text-black border-none rounded-2xl h-14 px-10 font-black text-lg shadow-2xl hover:!bg-slate-100 hover:scale-105 transition-all">
                 Explore Safety Features
               </Button>
             </div>
@@ -382,7 +382,7 @@ export default async function HomePage() {
               Join thousands of students and tutors who are already transforming education in Bangladesh.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button href="/signup" size="lg" className="h-16 px-10 rounded-2xl font-black text-lg shadow-xl shadow-primary/20">
+              <Button href="/signup" size="lg" className="h-16 px-10 rounded-2xl font-black text-lg shadow-xl shadow-primary-strong/30">
                 Join Now for Free
               </Button>
               <Button href="/signin" variant="outline" size="lg" className="h-16 px-10 rounded-2xl font-bold text-lg">

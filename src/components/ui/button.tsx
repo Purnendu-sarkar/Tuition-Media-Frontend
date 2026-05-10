@@ -9,9 +9,9 @@ type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
 
 const variantClasses: Record<ButtonVariant, string> = {
   default:
-    "bg-primary text-primary-foreground shadow-[0_20px_45px_-24px_rgba(15,118,110,0.8)] hover:bg-primary-strong focus-visible:ring-primary/30",
+    "bg-primary-strong text-white shadow-[0_20px_45px_-24px_rgba(15,118,110,0.8)] hover:bg-primary-strong/90 focus-visible:ring-primary/30",
   primary:
-    "bg-primary text-primary-foreground shadow-[0_20px_45px_-24px_rgba(15,118,110,0.8)] hover:bg-primary-strong focus-visible:ring-primary/30",
+    "bg-primary-strong text-white shadow-[0_20px_45px_-24px_rgba(15,118,110,0.8)] hover:bg-primary-strong/90 focus-visible:ring-primary/30",
   secondary:
     "bg-secondary-soft text-foreground hover:bg-secondary-soft/80 focus-visible:ring-secondary/30",
   ghost: "bg-transparent text-foreground hover:bg-foreground/5 focus-visible:ring-primary/20",
