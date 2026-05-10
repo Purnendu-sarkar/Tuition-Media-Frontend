@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HelpCircle, MessageSquare, AlertTriangle } from "lucide-react";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
-import { Footer } from "@/components/layouts/footer";
+import { PublicFooter } from "@/components/layouts/public-footer";
 
 export default function SupportLayout({
   children,
@@ -42,7 +42,7 @@ export default function SupportLayout({
           {children}
         </main>
       </div>
-      <Footer />
+      <PublicFooter />
     </div>
   );
 }

@@ -22,6 +22,7 @@ import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
+import { PublicFooter } from "@/components/layouts/public-footer";
 import { publicApi } from "@/lib/api/public";
 import { Badge } from "@/components/ui/badge";
 
@@ -392,14 +393,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Footer (Simplified for homepage) */}
-      <footer className="py-12 border-t border-border bg-surface/50">
-        <div className="container mx-auto max-w-7xl px-6 text-center">
-          <div className="text-sm text-muted-foreground font-medium">
-            © 2026 AI-Based Tuition Media. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

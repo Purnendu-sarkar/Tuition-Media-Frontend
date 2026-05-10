@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
+import { PublicFooter } from "@/components/layouts/public-footer";
 import Link from "next/link";
 import { div } from "framer-motion/client";
 
@@ -556,6 +557,7 @@ export default function PublicJobsPage() {
           </div>
         )}
       </AnimatePresence>
+      <PublicFooter />
     </div>
   );
 }

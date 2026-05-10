@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
+import { PublicFooter } from "@/components/layouts/public-footer";
 
 export default function TutorPublicProfilePage() {
   const params = useParams();
@@ -307,6 +308,7 @@ export default function TutorPublicProfilePage() {
           </div>
         </div>
       </div>
+      <PublicFooter />
     </div>
   );
 }
