@@ -15,8 +15,8 @@ export default function AdminJobsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session?.user?.accessToken) {
-      fetchJobs(session.user.accessToken);
+    if (session?.accessToken) {
+      fetchJobs(session.accessToken as string);
     }
   }, [session]);
 
@@ -34,11 +34,11 @@ export default function AdminJobsPage() {
 
   const handleDelete = async (jobId: string) => {
     if (!confirm("Are you sure you want to permanently delete this job? This will also delete all applications associated with it.")) return;
-    if (!session?.user?.accessToken) return;
+    if (!session?.accessToken) return;
 
     try {
       setActionLoading(jobId);
-      await adminApi.deleteJob(session.user.accessToken, jobId);
+      await adminApi.deleteJob(session.accessToken as string, jobId);
       setJobs(jobs.filter(j => j.id !== jobId));
     } catch (error) {
       console.error("Failed to delete job", error);

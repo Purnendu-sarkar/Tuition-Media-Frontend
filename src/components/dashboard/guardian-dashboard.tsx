@@ -18,14 +18,23 @@ import {
   BrainCircuit,
   ShieldCheck,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter 
+} from "@/components/ui/dialog";
 import type { GuardianDashboardStats, CreateJobData, Application } from "@/lib/api/guardian";
 import { guardianApi } from "@/lib/api/guardian";
 import { aiApi } from "@/lib/api/ai";
@@ -99,6 +108,12 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
     setError(null);
     setIsSubmitting(true);
 
+    if (formData.budget !== undefined && formData.budget < 0) {
+      setError("Budget cannot be negative");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await guardianApi.createJob(token, {
         ...formData,
@@ -162,30 +177,60 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
       if (status === "ACCEPTED") {
         const updatedData = await guardianApi.getDashboardStats(token);
         setData(updatedData);
+        toast.success("Application accepted!");
+      } else {
+        toast.info("Application rejected.");
       }
     } catch (err: any) {
-      console.error("Failed to update application:", err);
+      toast.error("Failed to update application", {
+        description: err.message
+      });
     } finally {
       setAppActionLoading(null);
     }
   };
 
   const handleSubmitReview = async () => {
-    if (!reviewTutorId) return;
+    if (!reviewTutorId || !reviewJobId) return;
     setIsSubmittingReview(true);
     try {
       await reviewApi.createReview(token, {
         rating: reviewRating,
         comment: reviewComment,
         revieweeId: reviewTutorId,
-        jobId: reviewJobId || undefined
+        jobId: reviewJobId
       });
+      
+      // Update local state to hide the rate button for this specific application
+      setApplications(prev => prev.map(app => 
+        app.jobId === reviewJobId && app.tutorId === reviewTutorId 
+          ? { ...app, isReviewed: true } 
+          : app
+      ));
+
       setIsReviewModalOpen(false);
       setReviewComment("");
       setReviewRating(5);
-      alert("Thank you for your feedback!");
+      toast.success("Thank you for your feedback!", {
+        description: "Your review has been successfully submitted."
+      });
     } catch (err: any) {
-      alert(err.message || "Failed to submit review");
+      if (err.message.includes("already reviewed")) {
+        toast.info("Already Reviewed", {
+          description: "You have already submitted a review for this tuition job."
+        });
+        // Mark as reviewed even on error if it's a "duplicate" error
+        setApplications(prev => prev.map(app => 
+          app.jobId === reviewJobId && app.tutorId === reviewTutorId 
+            ? { ...app, isReviewed: true } 
+            : app
+        ));
+        setIsReviewModalOpen(false);
+      } else {
+        toast.error("Failed to submit review", {
+          description: err.message || "An unexpected error occurred."
+        });
+      }
     } finally {
       setIsSubmittingReview(false);
     }
@@ -433,9 +478,14 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                     <Input
                       id="budget"
                       type="number"
+                      min="0"
                       placeholder="e.g. 5000"
                       value={formData.budget || ""}
-                      onChange={e => setFormData(p => ({ ...p, budget: e.target.value ? Number(e.target.value) : undefined }))}
+                      onChange={e => {
+                        const val = e.target.value ? Number(e.target.value) : undefined;
+                        if (val !== undefined && val < 0) return;
+                        setFormData(p => ({ ...p, budget: val }));
+                      }}
                     />
                   </div>
 
@@ -564,18 +614,24 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
                                   <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                                     ACCEPTED
                                   </span>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline" 
-                                    className="gap-1 text-xs"
-                                    onClick={() => {
-                                      setReviewTutorId(app.tutorId);
-                                      setReviewJobId(app.jobId);
-                                      setIsReviewModalOpen(true);
-                                    }}
-                                  >
-                                    <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Rate
-                                  </Button>
+                                  {!app.isReviewed ? (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="gap-1 text-xs"
+                                      onClick={() => {
+                                        setReviewTutorId(app.tutorId);
+                                        setReviewJobId(app.jobId);
+                                        setIsReviewModalOpen(true);
+                                      }}
+                                    >
+                                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Rate
+                                    </Button>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground italic flex items-center gap-1 bg-muted/20 px-2 py-1 rounded-md border border-border/30">
+                                      <CheckCircle2 className="h-3 w-3 text-emerald-500" /> Reviewed
+                                    </span>
+                                  )}
                                 </div>
                               ) : (
                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border bg-red-500/10 text-red-500 border-red-500/20`}>
@@ -600,66 +656,56 @@ export function GuardianDashboard({ initialData, token }: GuardianDashboardProps
         )}
       </AnimatePresence>
 
-      {/* Review Modal */}
-      <AnimatePresence>
-        {isReviewModalOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => !isSubmittingReview && setIsReviewModalOpen(false)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">Rate Your Tutor</h2>
-                <button onClick={() => setIsReviewModalOpen(false)} className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="space-y-6 text-center">
-                <div className="flex justify-center gap-2">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setReviewRating(s)}
-                      className="transition-transform active:scale-90"
-                    >
-                      <Star
-                        className={`h-10 w-10 ${s <= reviewRating ? 'fill-amber-500 text-amber-500' : 'text-muted'}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-
-                <div className="space-y-2 text-left">
-                  <label className="text-sm font-medium">Your Feedback (Optional)</label>
-                  <textarea
-                    className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    placeholder="Tell others about your experience with this tutor..."
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
+      {/* Review Modal using shadcn Dialog */}
+      <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Rate Your Tutor</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setReviewRating(s)}
+                  className="transition-transform active:scale-90 hover:scale-110"
+                >
+                  <Star
+                    className={`h-10 w-10 ${s <= reviewRating ? 'fill-amber-500 text-amber-500' : 'text-muted'}`}
                   />
-                </div>
+                </button>
+              ))}
+            </div>
 
-                <div className="pt-4 flex gap-3">
-                  <Button variant="ghost" className="flex-1" onClick={() => setIsReviewModalOpen(false)} disabled={isSubmittingReview}>Cancel</Button>
-                  <Button className="flex-1" onClick={handleSubmitReview} disabled={isSubmittingReview}>
-                    {isSubmittingReview ? "Submitting..." : "Submit Review"}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Your Feedback (Optional)</label>
+              <textarea
+                className="flex min-h-[100px] w-full rounded-xl border border-input bg-muted/5 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                placeholder="Tell others about your experience with this tutor..."
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+
+          <DialogFooter className="sm:justify-between gap-3 pt-4">
+            <Button variant="ghost" className="flex-1 rounded-xl" onClick={() => setIsReviewModalOpen(false)} disabled={isSubmittingReview}>
+              Cancel
+            </Button>
+            <Button className="flex-1 rounded-xl font-bold gap-2" onClick={handleSubmitReview} disabled={isSubmittingReview}>
+              {isSubmittingReview ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Review"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

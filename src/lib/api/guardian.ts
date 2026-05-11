@@ -42,6 +42,7 @@ export interface Application {
       location: string | null;
     } | null;
   };
+  isReviewed?: boolean;
 }
 
 export const guardianApi = {

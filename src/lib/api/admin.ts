@@ -6,6 +6,18 @@ export interface AdminStats {
   totalGuardians: number;
   activeJobs: number;
   pendingVerifications: number;
+  totalReviews: number;
+  averageRating: number;
+  totalMessages: number;
+  verificationStats: {
+    approved: number;
+    rejected: number;
+    pending: number;
+  };
+  growth: {
+    newUsers7d: number;
+    newJobs7d: number;
+  };
 }
 
 export interface AdminUser {

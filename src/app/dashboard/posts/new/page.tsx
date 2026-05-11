@@ -66,6 +66,12 @@ export default function AIJobPostGenerator() {
     setError(null);
 
     try {
+      if (formData.budget !== undefined && formData.budget < 0) {
+        setError("Budget cannot be negative");
+        setIsSubmitting(false);
+        return;
+      }
+
       await guardianApi.createJob(session.accessToken, {
         ...formData,
         budget: formData.budget ? Number(formData.budget) : undefined
@@ -213,9 +219,14 @@ export default function AIJobPostGenerator() {
               <Input
                 id="budget"
                 type="number"
+                min="0"
                 placeholder="e.g. 5000"
                 value={formData.budget || ""}
-                onChange={e => setFormData(p => ({ ...p, budget: e.target.value ? Number(e.target.value) : undefined }))}
+                onChange={e => {
+                  const val = e.target.value ? Number(e.target.value) : undefined;
+                  if (val !== undefined && val < 0) return;
+                  setFormData(p => ({ ...p, budget: val }));
+                }}
                 className="h-11"
               />
               <p className="text-xs text-muted-foreground">Leave blank if negotiable.</p>
