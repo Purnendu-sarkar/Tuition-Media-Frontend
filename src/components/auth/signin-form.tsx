@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { AlertCircle, ArrowRight, ShieldCheck, GraduationCap, Users } from "lucide-react";
 import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,27 @@ export function SigninForm({ allowGoogle }: SigninFormProps) {
       })();
     });
   });
+
+  const loginAs = (email: string, password: string) => {
+    startTransition(() => {
+      void (async () => {
+        setSubmissionError(null);
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setSubmissionError("Demo login failed.");
+          return;
+        }
+
+        router.replace("/dashboard");
+        router.refresh();
+      })();
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -106,6 +127,42 @@ export function SigninForm({ allowGoogle }: SigninFormProps) {
           Continue with Google
         </Button>
       ) : null}
+
+      <div className="pt-4 border-t border-border/50">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4 text-center">Quick Demo Access</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Button 
+            variant="outline" 
+            type="button"
+            className="flex flex-col items-center gap-2 h-auto py-4 bg-primary/5 border-primary/20 hover:bg-primary/10 transition-all group rounded-2xl"
+            onClick={() => loginAs("admin@demo.com", "password123")}
+            disabled={isPending}
+          >
+            <ShieldCheck className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-semibold">Admin</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            type="button"
+            className="flex flex-col items-center gap-2 h-auto py-4 bg-primary/5 border-primary/20 hover:bg-primary/10 transition-all group rounded-2xl"
+            onClick={() => loginAs("tutor1@demo.com", "password123")}
+            disabled={isPending}
+          >
+            <GraduationCap className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-semibold">Tutor</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            type="button"
+            className="flex flex-col items-center gap-2 h-auto py-4 bg-primary/5 border-primary/20 hover:bg-primary/10 transition-all group rounded-2xl"
+            onClick={() => loginAs("guardian1@demo.com", "password123")}
+            disabled={isPending}
+          >
+            <Users className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-semibold">Guardian</span>
+          </Button>
+        </div>
+      </div>
 
       <p className="text-sm text-muted-foreground">
         Need an account?{" "}
