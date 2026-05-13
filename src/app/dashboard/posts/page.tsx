@@ -33,7 +33,7 @@ export default function GuardianPostsPage() {
     async function fetchJobs() {
       if (!session?.accessToken) return;
       try {
-        const data = await guardianApi.getAllJobs(session.accessToken);
+        const data = await guardianApi.getAllJobs(session.accessToken as string);
         setJobs(data);
       } catch (err) {
         setError("Failed to load your tuition posts. Please try again later.");

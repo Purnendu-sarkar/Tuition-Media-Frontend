@@ -60,7 +60,7 @@ export default function IdentityVerificationPage() {
     }
     try {
       setIsLoading(true);
-      const res = await verificationApi.getMyVerification(session.accessToken);
+      const res = await verificationApi.getMyVerification(session.accessToken as string);
       setDoc(res.verification);
     } catch (error) {
       console.error("Failed to fetch verification", error);
@@ -117,7 +117,7 @@ export default function IdentityVerificationPage() {
       formData.append("deviceFingerprint", deviceFingerprint);
       formData.append("ipAddress", ipAddress);
 
-      await verificationApi.submitVerification(session.accessToken, formData);
+      await verificationApi.submitVerification(session.accessToken as string, formData);
       await fetchMyVerification();
     } catch (err: any) {
       setError(err.message || "Failed to submit verification.");

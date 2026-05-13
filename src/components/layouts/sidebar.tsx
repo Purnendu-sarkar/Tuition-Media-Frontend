@@ -45,10 +45,8 @@ export function Sidebar({ role, className = "" }: SidebarProps) {
           { label: "AI Matches", href: "/dashboard/jobs/ai", icon: Sparkles },
           { label: "My Applications", href: "/dashboard/applications", icon: FileText },
           { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-          { label: "Wallet", href: "/dashboard/wallet", icon: Wallet },
           { label: "Schedule", href: "/dashboard/schedule", icon: CalendarDays },
           { label: "Verification", href: "/dashboard/verification", icon: ShieldCheck },
-          { label: "Premium", href: "/dashboard/premium", icon: Star },
         ];
       case "GUARDIAN":
         return [
@@ -58,7 +56,6 @@ export function Sidebar({ role, className = "" }: SidebarProps) {
           { label: "Applications", href: "/dashboard/hiring", icon: Users },
           { label: "Messages", href: "/dashboard/messages", icon: MessageSquare },
           { label: "Saved Tutors", href: "/dashboard/saved", icon: Heart },
-          { label: "Billing", href: "/dashboard/billing", icon: CreditCard },
           { label: "Verification", href: "/dashboard/verification", icon: ShieldCheck },
         ];
       case "ADMIN":

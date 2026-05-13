@@ -45,6 +45,23 @@ export interface Application {
   isReviewed?: boolean;
 }
 
+export interface SavedTutor {
+  id: string;
+  tutorId: string;
+  createdAt: string;
+  tutor: {
+    id: string;
+    name: string;
+    image: string | null;
+    tutorProfile: {
+      bio: string | null;
+      hourlyRate: number | null;
+      location: string | null;
+      subjects: string[];
+    } | null;
+  };
+}
+
 export const guardianApi = {
   getDashboardStats: (token: string) => {
     return apiClient.get<GuardianDashboardStats>("/api/v1/guardian/dashboard", {
@@ -77,6 +94,26 @@ export const guardianApi = {
   },
   updateApplicationStatus: (token: string, applicationId: string, status: "ACCEPTED" | "REJECTED") => {
     return apiClient.patch<{ id: string; status: string }>(`/api/v1/guardian/applications/${applicationId}/status`, { status }, {
+      Authorization: `Bearer ${token}`,
+    });
+  },
+  getSavedTutors: (token: string) => {
+    return apiClient.get<SavedTutor[]>("/api/v1/guardian/saved", {
+      Authorization: `Bearer ${token}`,
+    });
+  },
+  saveTutor: (token: string, tutorId: string) => {
+    return apiClient.post<{ id: string }> (`/api/v1/guardian/saved/${tutorId}`, {}, {
+      Authorization: `Bearer ${token}`,
+    });
+  },
+  unsaveTutor: (token: string, tutorId: string) => {
+    return apiClient.delete(`/api/v1/guardian/saved/${tutorId}`, {
+      Authorization: `Bearer ${token}`,
+    });
+  },
+  checkIfSaved: (token: string, tutorId: string) => {
+    return apiClient.get<{ isSaved: boolean }>(`/api/v1/guardian/saved/${tutorId}/check`, {
       Authorization: `Bearer ${token}`,
     });
   },

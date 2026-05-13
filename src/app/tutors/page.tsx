@@ -11,7 +11,9 @@ import {
   SlidersHorizontal,
   X,
   ShieldCheck,
-  ArrowRight
+  ArrowRight,
+  Bookmark,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 
@@ -22,6 +24,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
 import { PublicFooter } from "@/components/layouts/public-footer";
+import { useSession } from "next-auth/react";
+import { guardianApi } from "@/lib/api/guardian";
+import { toast } from "sonner";
 
 const container = {
   hidden: { opacity: 0 },
@@ -41,6 +46,11 @@ export default function TutorsSearchPage() {
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const [savedTutorIds, setSavedTutorIds] = useState<Set<string>>(new Set());
+  const [isSavingId, setIsSavingId] = useState<string | null>(null);
+
+  const isGuardian = session?.user?.role === "GUARDIAN";
 
   // Filter States
   const [filters, setFilters] = useState({
@@ -73,6 +83,50 @@ export default function TutorsSearchPage() {
     }, 500); // Debounce search
     return () => clearTimeout(timer);
   }, [fetchTutors]);
+
+  useEffect(() => {
+    if (isGuardian && session?.accessToken) {
+      fetchSavedTutorIds();
+    }
+  }, [isGuardian, session]);
+
+  const fetchSavedTutorIds = async () => {
+    if (!session?.accessToken) return;
+    try {
+      const res = await guardianApi.getSavedTutors(session.accessToken as string);
+      setSavedTutorIds(new Set(res.map(st => st.tutorId)));
+    } catch (err) {
+      console.error("Failed to fetch saved tutors:", err);
+    }
+  };
+
+  const toggleSaveTutor = async (e: React.MouseEvent, tutorId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!session?.accessToken) return;
+
+    setIsSavingId(tutorId);
+    try {
+      const isCurrentlySaved = savedTutorIds.has(tutorId);
+      if (isCurrentlySaved) {
+        await guardianApi.unsaveTutor(session.accessToken as string, tutorId);
+        setSavedTutorIds(prev => {
+          const next = new Set(prev);
+          next.delete(tutorId);
+          return next;
+        });
+        toast.success("Removed from saved list");
+      } else {
+        await guardianApi.saveTutor(session.accessToken as string, tutorId);
+        setSavedTutorIds(prev => new Set(prev).add(tutorId));
+        toast.success("Added to saved list");
+      }
+    } catch (err) {
+      toast.error("Action failed");
+    } finally {
+      setIsSavingId(null);
+    }
+  };
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
@@ -235,6 +289,25 @@ export default function TutorsSearchPage() {
                                 <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" /> {tutor.averageRating} ({tutor.totalReviews})
                               </Badge>
                             </div>
+
+                            {/* Save Button */}
+                            {isGuardian && (
+                              <button
+                                onClick={(e) => toggleSaveTutor(e, tutor.id)}
+                                disabled={isSavingId === tutor.id}
+                                className={`absolute top-4 right-4 p-2.5 rounded-xl backdrop-blur-md transition-all z-20 ${
+                                  savedTutorIds.has(tutor.id)
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    : "bg-white/20 text-white hover:bg-white/40 border border-white/30"
+                                }`}
+                              >
+                                {isSavingId === tutor.id ? (
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                  <Bookmark className={`h-5 w-5 ${savedTutorIds.has(tutor.id) ? "fill-white" : ""}`} />
+                                )}
+                              </button>
+                            )}
 
                             {/* Hover Action */}
                             <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

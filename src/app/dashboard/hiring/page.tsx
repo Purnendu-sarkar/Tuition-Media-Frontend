@@ -38,7 +38,7 @@ function HiringContent() {
     async function fetchJobs() {
       if (!session?.accessToken) return;
       try {
-        const data = await guardianApi.getAllJobs(session.accessToken);
+        const data = await guardianApi.getAllJobs(session.accessToken as string);
         setJobs(data);
         if (data.length > 0 && !selectedJobId) {
           setSelectedJobId(data[0].id);
@@ -57,7 +57,7 @@ function HiringContent() {
       if (!session?.accessToken || !selectedJobId) return;
       setIsAppsLoading(true);
       try {
-        const data = await guardianApi.getJobApplications(session.accessToken, selectedJobId);
+        const data = await guardianApi.getJobApplications(session.accessToken as string, selectedJobId);
         setApplications(data);
       } catch (err) {
         setError("Failed to load applications.");
@@ -72,7 +72,7 @@ function HiringContent() {
     if (!session?.accessToken) return;
     setIsUpdating(true);
     try {
-      await guardianApi.updateApplicationStatus(session.accessToken, appId, status);
+      await guardianApi.updateApplicationStatus(session.accessToken as string, appId, status);
       setApplications(prev => prev.map(app =>
         app.id === appId ? { ...app, status } : app
       ));
@@ -90,7 +90,7 @@ function HiringContent() {
     if (!session?.accessToken) return;
     setIsMessaging(true);
     try {
-      await messageApi.initiateConversation(session.accessToken, tutorId);
+      await messageApi.initiateConversation(session.accessToken as string, tutorId);
       router.push("/dashboard/messages");
     } catch (err) {
       alert("Failed to initiate chat.");

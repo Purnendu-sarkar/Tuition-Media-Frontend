@@ -44,7 +44,7 @@ export default function AIJobPostGenerator() {
     setIsGenerating(true);
     setError(null);
     try {
-      const generated = await aiApi.generateJobPost(session.accessToken, aiPrompt);
+      const generated = await aiApi.generateJobPost(session.accessToken as string, aiPrompt);
       setFormData(prev => ({
         ...prev,
         title: generated.title,
@@ -72,7 +72,7 @@ export default function AIJobPostGenerator() {
         return;
       }
 
-      await guardianApi.createJob(session.accessToken, {
+      await guardianApi.createJob(session.accessToken as string, {
         ...formData,
         budget: formData.budget ? Number(formData.budget) : undefined
       });

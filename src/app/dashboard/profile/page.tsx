@@ -52,7 +52,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       if (session?.accessToken) {
-        const profile = await tutorApi.getProfile(session.accessToken);
+        const profile = await tutorApi.getProfile(session.accessToken as string);
         setFormData({
           name: profile.name || "",
           email: profile.email || "",
@@ -87,7 +87,7 @@ export default function ProfilePage() {
 
     setIsOptimizing(true);
     try {
-      const { optimizedBio } = await aiApi.optimizeBio(session.accessToken, formData.bio);
+      const { optimizedBio } = await aiApi.optimizeBio(session.accessToken as string, formData.bio);
       if (optimizedBio) {
         setFormData(prev => ({ ...prev, bio: optimizedBio }));
       }
@@ -105,7 +105,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     setSuccess(false);
     try {
-      await tutorApi.updateProfile(session.accessToken, formData);
+      await tutorApi.updateProfile(session.accessToken as string, formData);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
       

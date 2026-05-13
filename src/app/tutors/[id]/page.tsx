@@ -22,9 +22,13 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 
 import { publicApi, PublicTutor } from "@/lib/api/public";
+import { guardianApi } from "@/lib/api/guardian";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { Bookmark } from "lucide-react";
 import { PublicNavbar } from "@/components/layouts/public-navbar";
 import { PublicFooter } from "@/components/layouts/public-footer";
 
@@ -32,13 +36,31 @@ export default function TutorPublicProfilePage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const { data: session } = useSession();
   const [tutor, setTutor] = useState<(PublicTutor & { reviewsReceived: any[], createdAt: string }) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isGuardian = session?.user?.role === "GUARDIAN";
 
   useEffect(() => {
     fetchTutor();
-  }, [id]);
+    if (isGuardian) {
+      checkSavedStatus();
+    }
+  }, [id, isGuardian]);
+
+  const checkSavedStatus = async () => {
+    if (!session?.accessToken) return;
+    try {
+      const res = await guardianApi.checkIfSaved(session.accessToken, id);
+      setIsSaved(res.isSaved);
+    } catch (err) {
+      console.error("Failed to check saved status:", err);
+    }
+  };
 
   const fetchTutor = async () => {
     try {
@@ -160,6 +182,35 @@ export default function TutorPublicProfilePage() {
                 <Button className="w-full h-12 rounded-xl shadow-lg shadow-primary/20 gap-2">
                   <MessageSquare className="h-4 w-4" /> Send Message
                 </Button>
+                {isGuardian && (
+                  <Button 
+                    variant={isSaved ? "secondary" : "outline"} 
+                    className={`w-full h-12 rounded-xl gap-2 transition-all ${isSaved ? 'bg-primary/10 text-primary border-primary/20' : ''}`}
+                    onClick={async () => {
+                      if (!session?.accessToken) return;
+                      setIsSaving(true);
+                      try {
+                        if (isSaved) {
+                          await guardianApi.unsaveTutor(session.accessToken, id);
+                          setIsSaved(false);
+                          toast.success("Removed from saved tutors");
+                        } else {
+                          await guardianApi.saveTutor(session.accessToken, id);
+                          setIsSaved(true);
+                          toast.success("Added to saved tutors");
+                        }
+                      } catch (err) {
+                        toast.error("Action failed");
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                    disabled={isSaving}
+                  >
+                    <Bookmark className={`h-4 w-4 ${isSaved ? 'fill-primary text-primary' : ''}`} /> 
+                    {isSaved ? "Saved to List" : "Save for Later"}
+                  </Button>
+                )}
                 <Button variant="outline" className="w-full h-12 rounded-xl gap-2">
                   <Calendar className="h-4 w-4" /> Schedule Lesson
                 </Button>
